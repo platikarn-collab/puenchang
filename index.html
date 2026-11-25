@@ -143,10 +143,12 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     if (can && !found) h += '<div class="col" style="background:#FFF7ED;border:2px solid #FDBA74;border-radius:14px;padding:12px 14px;gap:8px"><div style="font-size:15px;font-weight:700;color:#9A3412">ลูกค้าใหม่ — ใส่ชื่อเล่นพอ (ไม่บังคับ)</div><input id="cus" class="inp" data-in="cusName" value="' + esc(S.cusName) + '" aria-label="ชื่อลูกค้า" placeholder="ชื่อลูกค้า เช่น พี่ต้น"><div style="font-size:14px;color:#7C2D12">ระบบจะส่ง QR ให้ลูกค้าสแกนเพิ่มเพื่อน LINE ของอู่</div></div>';
     h += '</section><section class="col" style="gap:10px"><div class="step"><span class="num">2</span>ถ่ายรูปรอบคัน <span style="font-size:15px;font-weight:500;color:#475569">(' + pc + '/6)</span></div><div class="g3">';
     SHOTS.forEach(function (k) {
-      var on = !!S.shots[k];
-      h += '<button data-act="shot" data-v="' + k + '" aria-pressed="' + on + '" style="height:86px;border-radius:14px;border:2px ' + (on ? 'solid #1E3A8A' : 'dashed #93C5FD') + ';background:' + (on ? '#1E3A8A' : '#fff') + ';color:' + (on ? '#fff' : '#1E3A8A') + ';display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:15px;font-weight:600">' + I.cam + (on ? '✓ ' : '') + k + '</button>';
+      var src = S.shots[k];
+      h += '<label style="position:relative;height:96px;border-radius:14px;border:2px ' + (src ? 'solid #1E3A8A' : 'dashed #93C5FD') + ';background:' + (src ? '#1E3A8A url(' + src + ') center/cover' : '#fff') + ';color:#1E3A8A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:15px;font-weight:600;overflow:hidden;cursor:pointer">' +
+        (src ? '<span style="position:absolute;left:0;right:0;bottom:0;background:rgba(15,23,42,.75);color:#fff;padding:4px 0;text-align:center">✓ ' + k + '</span>' : I.cam + k) +
+        '<input type="file" accept="image/*" capture="environment" data-shot="' + k + '" aria-label="ถ่ายรูป' + k + '" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none"></label>';
     });
-    h += '</div></section><section class="col" style="gap:10px"><div class="step"><span class="num">3</span>อาการเสีย (เลือกได้หลายข้อ)</div><div class="g2">';
+    h += '</div><div style="font-size:14px;color:#475569">แตะช่องเพื่อเปิดกล้อง · แตะซ้ำเพื่อถ่ายใหม่</div></section><section class="col" style="gap:10px"><div class="step"><span class="num">3</span>อาการเสีย (เลือกได้หลายข้อ)</div><div class="g2">';
     PRESETS.forEach(function (p) {
       var on = !!S.sym[p[0]];
       h += '<button data-act="sym" data-v="' + p[0] + '" aria-pressed="' + on + '" style="min-height:58px;border-radius:14px;border:3px solid ' + (on ? '#F97316' : '#E2E8F0') + ';background:' + (on ? '#FFF7ED' : '#fff') + ';color:' + (on ? '#7C2D12' : '#0F172A') + ';font-size:17px;font-weight:600;padding:6px 8px;line-height:1.2">' + (on ? '✓ ' : '') + p[0] + '</button>';
@@ -170,7 +172,11 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     if (lj) {
       h += '<div style="background:#fff;border-radius:18px;border:1px solid #E2E8F0;overflow:hidden"><div style="background:#1E3A8A;color:#fff;padding:14px 16px"><div style="font-size:14px;color:#DBEAFE">ใบเสนอราคา · อู่ช่างเอก</div><div style="font-size:22px;font-weight:700">' + esc(lj.plate) + ' · ' + esc(lj.car) + '</div><div style="font-size:15px;color:#DBEAFE">เรียน ' + esc(lj.cus) + '</div></div>' +
         '<div class="col" style="padding:14px 16px;gap:12px"><div style="font-size:16px;font-weight:600">รูปจุดที่เสีย</div><div class="g2">';
-      lj.pics.forEach(function (p) { h += '<div style="height:104px;border-radius:12px;background:repeating-linear-gradient(135deg,#E2E8F0 0 10px,#CBD5E1 10px 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#334155;font-size:14px;font-weight:600;text-align:center;padding:6px">' + I.img + esc(p) + '</div>'; });
+      lj.pics.forEach(function (p) {
+        if (typeof p === 'string') p = { label: p };
+        if (p.src) { h += '<div style="height:120px;border-radius:12px;background:#E2E8F0 url(' + p.src + ') center/cover;position:relative;overflow:hidden"><span style="position:absolute;left:0;right:0;bottom:0;background:rgba(15,23,42,.75);color:#fff;font-size:13px;padding:3px 8px">' + esc(p.label) + '</span></div>'; return; }
+        p = p.label;
+        h += '<div style="height:104px;border-radius:12px;background:repeating-linear-gradient(135deg,#E2E8F0 0 10px,#CBD5E1 10px 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#334155;font-size:14px;font-weight:600;text-align:center;padding:6px">' + I.img + esc(p) + '</div>'; });
       h += '</div><div class="col">';
       lj.items.forEach(function (i) { h += '<div class="row" style="justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed #CBD5E1;font-size:16px"><span style="line-height:1.3">' + esc(i.name) + '</span><span style="font-weight:600;white-space:nowrap">฿' + money(i.price) + '</span></div>'; });
       h += '<div class="row" style="justify-content:space-between;padding-top:12px;font-size:22px;font-weight:700;color:#1E3A8A"><span>รวมทั้งหมด</span><span>฿' + money(total(lj)) + '</span></div></div>';
@@ -255,14 +261,15 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     picked.forEach(function (p) { items = items.concat(it(p[1])); });
     if (!items.length) items = it([['ค่าตรวจเช็กเบื้องต้น', 'labor', 300, 100]]);
     var shots = SHOTS.filter(function (k) { return S.shots[k]; });
-    var pics = S.shots['จุดที่เสีย'] ? picked.map(function (p) { return 'จุดเสีย: ' + p[0]; }) : [];
+    shots.sort(function (a, b) { return (b === 'จุดที่เสีย') - (a === 'จุดที่เสีย'); });
+    var pics = shots.map(function (k) { return { label: k, src: S.shots[k] }; });
     var d = new Date(), id = 'j' + S.n;
     var job = {
       id: id, plate: S.plate.trim(), prov: found ? 'สุรินทร์' : 'ทะเบียนใหม่', car: found ? 'Toyota Vios สีเทา' : 'รถลูกค้าใหม่',
       cus: found ? 'คุณสมชาย' : (S.cusName.trim() || 'ลูกค้าใหม่'),
       sym: picked.length ? picked.map(function (p) { return p[0]; }).join(', ') : 'ตรวจเช็กทั่วไป', status: 'quote',
       time: ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2),
-      pics: pics.length ? pics : ['รูปรอบคัน ' + shots.length + ' รูป'], items: items
+      pics: pics.length ? pics : [{ label: 'ยังไม่ได้ถ่ายรูป' }], items: items
     };
     S.jobs = [job].concat(S.jobs);
     S.n++; S.plate = ''; S.km = ''; S.cusName = ''; S.shots = {}; S.sym = {}; S.screen = 'dash'; S.filter = 'all'; S.q = ''; S.lineId = id;
@@ -285,11 +292,16 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
       var k = find(v); k.status = 'repair';
       say(k.cus + ' กดอนุมัติแล้ว · หน้าอู่เปลี่ยน ' + k.plate + ' เป็น "กำลังซ่อม" ทันที');
     } else if (act === 'fill') set({ plate: v });
-    else if (act === 'shot') { S.shots[v] = !S.shots[v]; render(); }
     else if (act === 'sym') { S.sym[v] = !S.sym[v]; render(); }
     else if (act === 'submit') submit();
     else if (act === 'hide') set({ hide: !S.hide });
     else if (act === 'call') say('โหมดทดลอง: ของจริงจะโทรหาอู่ทันที');
+  });
+  app.addEventListener('change', function (e) {
+    var k = e.target.getAttribute('data-shot');
+    if (!k || !e.target.files || !e.target.files[0]) return;
+    S.shots[k] = URL.createObjectURL(e.target.files[0]);
+    render();
   });
   app.addEventListener('input', function (e) {
     var k = e.target.getAttribute('data-in');
