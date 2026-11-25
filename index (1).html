@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>เพื่อนช่าง (PuenChang) – ทดลองใช้ | JOE ระบบงานง่ายๆ</title>
+<meta name="description" content="ระบบจัดการอู่ซ่อมรถบนมือถือ กดง่ายใน 3 คลิก เปิดใบรับรถ ส่งใบเสนอราคาเข้า LINE ดูกำไรต่อคัน ในเครือ JOE ระบบงานง่ายๆ">
+<meta property="og:title" content="เพื่อนช่าง – ผู้ช่วยจัดการอู่ยุคใหม่ กดง่ายใน 3 คลิก">
+<meta property="og:description" content="ลองกดเล่นได้เลย: เปิดใบรับรถ · ส่งใบเสนอราคาเข้า LINE · ดูกำไรต่อคัน — ในเครือ JOE ระบบงานง่ายๆ">
+<meta name="theme-color" content="#1E3A8A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#E2E8F0}
+body{font-family:'Prompt',system-ui,sans-serif;color:#0F172A;-webkit-tap-highlight-color:transparent}
+button,input,a{font-family:inherit}
+button{cursor:pointer}
+input:focus,button:focus-visible,a:focus-visible{outline:3px solid #F97316;outline-offset:1px}
+#app{max-width:440px;margin:0 auto;height:100dvh;position:relative;display:flex;flex-direction:column;background:#F8FAFC;overflow:hidden;box-shadow:0 0 30px rgba(15,23,42,.15)}
+header{background:#1E3A8A;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+main{flex:1;overflow-y:auto;padding:16px 16px 100px}
+.h1{margin:0;font-size:24px;font-weight:700;color:#1E3A8A}
+.card{background:#fff;border-radius:18px;border:1px solid #E2E8F0;box-shadow:0 2px 6px rgba(15,23,42,.06);padding:14px;display:flex;flex-direction:column;gap:12px}
+.col{display:flex;flex-direction:column}
+.row{display:flex;align-items:center}
+.chip{flex-shrink:0;height:44px;padding:0 14px;border-radius:22px;border:2px solid;font-size:16px;font-weight:600}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.num{width:30px;height:30px;border-radius:15px;background:#1E3A8A;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:16px}
+.step{font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px}
+.inp{width:100%;height:54px;border-radius:14px;border:2px solid #CBD5E1;background:#fff;padding:0 14px;font-size:18px;color:#0F172A}
+nav{position:absolute;left:0;right:0;bottom:0;height:80px;background:#fff;border-top:1px solid #E2E8F0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:6px 4px calc(8px + env(safe-area-inset-bottom))}
+nav button{border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:14px;font-weight:600;position:relative}
+.toast{position:absolute;left:16px;right:16px;bottom:94px;background:#0F172A;color:#fff;border-radius:14px;padding:12px 14px;font-size:16px;line-height:1.35;box-shadow:0 6px 20px rgba(15,23,42,.3)}
+.plate{border:2px solid #0F172A;border-radius:8px;background:#fff;padding:4px 10px;text-align:center;flex-shrink:0;min-width:112px}
+.demo{background:#FFF7ED;color:#7C2D12;font-size:13px;text-align:center;padding:6px 10px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  var ST = {
+    quote: { label: 'รออนุมัติ', bg: '#E0E7FF', fg: '#1E3A8A' },
+    repair: { label: 'กำลังซ่อม', bg: '#FACC15', fg: '#422006' },
+    parts: { label: 'รออะไหล่', bg: '#DC2626', fg: '#FFFFFF' },
+    done: { label: 'ซ่อมเสร็จ', bg: '#15803D', fg: '#FFFFFF' }
+  };
+  var PRESETS = [
+    ['เบรกมีเสียง', [['ผ้าเบรกหน้า (คู่)', 'part', 1200, 750], ['ค่าแรงเปลี่ยนผ้าเบรก', 'labor', 300, 120]]],
+    ['แอร์ไม่เย็น', [['น้ำยาแอร์ + เช็กรั่ว', 'part', 900, 450], ['ค่าแรงระบบแอร์', 'labor', 400, 150]]],
+    ['เปลี่ยนน้ำมันเครื่อง', [['น้ำมันเครื่อง 4 ลิตร + กรอง', 'part', 1500, 980], ['ค่าแรงถ่ายน้ำมัน', 'labor', 150, 60]]],
+    ['เครื่องสั่น', [['หัวเทียน (ชุด)', 'part', 1200, 700], ['ค่าแรงเช็กเครื่องยนต์', 'labor', 500, 200]]],
+    ['ไฟเตือนขึ้น', [['สแกนโค้ดหาสาเหตุ', 'labor', 300, 50]]],
+    ['ยางสึก / รั่ว', [['ปะยาง + สลับยาง', 'labor', 200, 80]]],
+    ['แบตเตอรี่หมด', [['แบตเตอรี่ใหม่', 'part', 2500, 1800], ['ค่าแรงเปลี่ยนแบต', 'labor', 100, 30]]],
+    ['ช่วงล่างดัง', [['ลูกหมากปีกนก (คู่)', 'part', 1800, 1100], ['ค่าแรงช่วงล่าง', 'labor', 600, 250]]]
+  ];
+  var SHOTS = ['ด้านหน้า', 'ด้านหลัง', 'ด้านซ้าย', 'ด้านขวา', 'เลขไมล์', 'จุดที่เสีย'];
+  function it(a) { return a.map(function (x) { return { name: x[0], type: x[1], price: x[2], cost: x[3] }; }); }
+  var S = {
+    screen: 'dash', filter: 'all', q: '', plate: '', km: '', cusName: '', shots: {}, sym: {}, lineId: 'j4', hide: false, toast: '', n: 5,
+    jobs: [
+      { id: 'j1', plate: '1กท 5678', prov: 'กรุงเทพมหานคร', car: 'Honda City สีขาว', cus: 'คุณวิภา', sym: 'เบรกมีเสียง', status: 'repair', time: '08:15', pics: ['ผ้าเบรกหน้าสึก'], items: it([['ผ้าเบรกหน้า (คู่)', 'part', 1200, 750], ['เจียรจานเบรก', 'labor', 600, 200], ['ค่าแรงเปลี่ยนผ้าเบรก', 'labor', 300, 120]]) },
+      { id: 'j2', plate: 'ขม 9012', prov: 'สุรินทร์', car: 'Isuzu D-Max สีเทา', cus: 'คุณประเสริฐ', sym: 'แอร์ไม่เย็น', status: 'parts', time: '09:40', pics: ['คอมแอร์รั่ว'], items: it([['คอมเพรสเซอร์แอร์ (รีบิลต์)', 'part', 6500, 4200], ['น้ำยาแอร์', 'part', 900, 450], ['ค่าแรงระบบแอร์', 'labor', 1200, 500]]) },
+      { id: 'j3', plate: '3กก 3456', prov: 'กรุงเทพมหานคร', car: 'Toyota Yaris สีแดง', cus: 'คุณนภา', sym: 'เช็กระยะ 40,000 กม.', status: 'done', time: '07:50', pics: ['ไส้กรองอากาศเก่า'], items: it([['น้ำมันเครื่อง 4 ลิตร + กรอง', 'part', 1500, 980], ['ไส้กรองอากาศ', 'part', 350, 180], ['ค่าแรงเช็กระยะ', 'labor', 500, 200]]) },
+      { id: 'j4', plate: 'บว 7788', prov: 'สุรินทร์', car: 'Mitsubishi Triton สีดำ', cus: 'คุณสมศักดิ์', sym: 'ช่วงล่างดัง, ยางสึก', status: 'quote', time: '10:20', pics: ['ลูกหมากปีกนกหลวม', 'ยางหน้าสึกขอบ'], items: it([['ลูกหมากปีกนกล่าง (คู่)', 'part', 1800, 1100], ['ยางหน้า 265/65R17 (2 เส้น)', 'part', 6400, 5000], ['ค่าแรงช่วงล่าง + ตั้งศูนย์', 'labor', 1200, 500]]) }
+    ]
+  };
+  var timer;
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function norm(p) { return (p || '').replace(/[\s-]/g, ''); }
+  function money(n) { return S.hide ? '••••' : Number(n).toLocaleString('en-US'); }
+  function total(j) { return j.items.reduce(function (a, i) { return a + i.price; }, 0); }
+  function find(id) { return S.jobs.filter(function (j) { return j.id === id; })[0]; }
+  function set(p) { for (var k in p) S[k] = p[k]; render(); }
+  function say(m) { clearTimeout(timer); set({ toast: m }); timer = setTimeout(function () { set({ toast: '' }); }, 2800); }
+
+  var I = {
+    wrench: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></svg>',
+    chat: function (c, s) { return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg>'; },
+    cam: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+    img: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>'
+  };
+
+  function header() {
+    var sub = { dash: 'หน้าหลัก', 'in': 'รับรถ', line: 'ฝั่งลูกค้า', profit: 'เจ้าของอู่' }[S.screen];
+    return '<header><div style="width:44px;height:44px;border-radius:12px;background:#F97316;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + I.wrench + '</div>' +
+      '<div style="flex:1;min-width:0"><div style="font-size:22px;font-weight:700;color:#fff;line-height:1.2">เพื่อนช่าง <span style="font-size:14px;font-weight:500;color:#BFDBFE">PuenChang</span></div>' +
+      '<div style="font-size:13px;color:#DBEAFE;line-height:1.3">ผู้ช่วยจัดการอู่ยุคใหม่ กดง่ายใน 3 คลิก</div>' +
+      '<div style="font-size:12px;color:#FDBA74;font-weight:600;line-height:1.3;margin-top:2px">ในเครือ JOE · ระบบงานง่ายๆ</div></div>' +
+      '<div style="font-size:13px;color:#DBEAFE;text-align:right;line-height:1.3">อู่ช่างเอก<br>' + sub + '</div></header>' +
+      '<div class="demo">โหมดทดลอง · ข้อมูลตัวอย่าง กดเล่นได้ทุกปุ่ม</div>';
+  }
+
+  function dash() {
+    var qn = norm(S.q);
+    var f = [['all', 'ทั้งหมด'], ['quote', 'รออนุมัติ'], ['repair', 'กำลังซ่อม'], ['parts', 'รออะไหล่'], ['done', 'เสร็จแล้ว']];
+    var h = '<div class="col" style="gap:14px"><div class="row" style="justify-content:space-between;align-items:baseline"><h1 class="h1">รถในอู่วันนี้</h1><div style="font-size:16px;color:#475569">' + S.jobs.length + ' คัน</div></div>' +
+      '<input id="q" class="inp" data-in="q" value="' + esc(S.q) + '" placeholder="🔍 ค้นหาเลขทะเบียน เช่น ขม 9012" aria-label="ค้นหาเลขทะเบียน">' +
+      '<div class="row" style="gap:8px;overflow-x:auto;padding-bottom:2px">';
+    f.forEach(function (x) {
+      var on = S.filter === x[0], c = x[0] === 'all' ? S.jobs.length : S.jobs.filter(function (j) { return j.status === x[0]; }).length;
+      h += '<button class="chip" data-act="filter" data-v="' + x[0] + '" style="border-color:' + (on ? '#1E3A8A' : '#CBD5E1') + ';background:' + (on ? '#1E3A8A' : '#fff') + ';color:' + (on ? '#fff' : '#1E3A8A') + '">' + x[1] + ' ' + c + '</button>';
+    });
+    h += '</div>';
+    var list = S.jobs.filter(function (j) { return (S.filter === 'all' || j.status === S.filter) && (!qn || norm(j.plate).indexOf(qn) >= 0); });
+    list.forEach(function (j) {
+      var s = ST[j.status];
+      h += '<article class="card"><div class="row" style="gap:12px;align-items:flex-start"><div class="plate"><div style="font-size:24px;font-weight:700;line-height:1.2">' + esc(j.plate) + '</div><div style="font-size:12px;color:#334155;line-height:1.2">' + esc(j.prov) + '</div></div>' +
+        '<div style="flex:1;min-width:0"><div style="display:inline-block;padding:3px 10px;border-radius:10px;background:' + s.bg + ';color:' + s.fg + ';font-size:15px;font-weight:600">' + s.label + '</div>' +
+        '<div style="font-size:16px;font-weight:600;margin-top:4px;line-height:1.3">' + esc(j.car) + '</div><div style="font-size:14px;color:#475569">' + esc(j.cus) + ' · เข้า ' + j.time + ' น.</div></div></div>' +
+        '<div style="font-size:16px;color:#334155;background:#F1F5F9;border-radius:10px;padding:8px 12px">อาการ: ' + esc(j.sym) + '</div>';
+      if (j.status === 'quote') {
+        h += '<div style="font-size:15px;color:#1E3A8A">ส่งใบเสนอราคา ฿' + money(total(j)) + ' เข้า LINE แล้ว · รอลูกค้ากดอนุมัติ</div>' +
+          '<button data-act="openLine" data-v="' + j.id + '" style="height:54px;border-radius:14px;border:2px solid #1E3A8A;background:#fff;color:#1E3A8A;font-size:18px;font-weight:600">ดูหน้าที่ลูกค้าเห็นใน LINE</button>';
+      } else {
+        h += '<div class="g3">';
+        [['repair', 'กำลังซ่อม'], ['parts', 'รออะไหล่'], ['done', 'ซ่อมเสร็จ']].forEach(function (b) {
+          var on = j.status === b[0], c = ST[b[0]];
+          h += '<button data-act="status" data-v="' + j.id + '" data-s="' + b[0] + '" aria-pressed="' + on + '" style="height:58px;border-radius:14px;border:3px solid ' + (on ? c.bg : '#E2E8F0') + ';background:' + (on ? c.bg : '#fff') + ';color:' + (on ? c.fg : '#334155') + ';font-size:16px;font-weight:700;padding:0 4px">' + b[1] + '</button>';
+        });
+        h += '</div>';
+      }
+      h += '</article>';
+    });
+    if (!list.length) h += '<div style="text-align:center;padding:32px 12px;color:#475569;font-size:17px">ไม่พบรถทะเบียนนี้ในอู่<br>กดปุ่ม <b style="color:#1E3A8A">รับรถ</b> ด้านล่างเพื่อเปิดใบใหม่</div>';
+    return h + '</div>';
+  }
+
+  function checkin() {
+    var pn = norm(S.plate), found = pn === 'กข1234', can = pn.length >= 3;
+    var pc = SHOTS.filter(function (k) { return S.shots[k]; }).length;
+    var sc = PRESETS.filter(function (p) { return S.sym[p[0]]; }).length;
+    var h = '<div class="col" style="gap:18px"><h1 class="h1">เปิดใบรับรถด่วน</h1>' +
+      '<section class="col" style="gap:10px"><label for="plate" class="step"><span class="num">1</span>เลขทะเบียนรถ</label>' +
+      '<input id="plate" data-in="plate" value="' + esc(S.plate) + '" placeholder="เช่น กข 1234" style="width:100%;height:68px;border-radius:14px;border:3px solid #0F172A;background:#fff;text-align:center;font-size:30px;font-weight:700;color:#0F172A">' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap"><span style="font-size:14px;color:#475569">ลองกด:</span>' +
+      '<button class="chip" data-act="fill" data-v="กข 1234" style="border-color:#1E3A8A;background:#EFF6FF;color:#1E3A8A">กข 1234 (ลูกค้าเก่า)</button>' +
+      '<button class="chip" data-act="fill" data-v="ฮต 4455" style="border-color:#CBD5E1;background:#fff;color:#334155">ลูกค้าใหม่</button></div>';
+    if (found) h += '<div class="col" style="background:#ECFDF5;border:2px solid #15803D;border-radius:14px;padding:12px 14px;gap:4px"><div style="font-size:15px;font-weight:700;color:#166534">✓ เจอประวัติลูกค้าเก่า ดึงข้อมูลให้แล้ว</div><div style="font-size:18px;font-weight:600">คุณสมชาย ใจดี · 089-555-1234</div><div style="font-size:16px;color:#334155">Toyota Vios สีเทา · สุรินทร์</div><div style="font-size:15px;color:#334155">ครั้งล่าสุด 12 พ.ค. 2569 — เปลี่ยนน้ำมันเครื่อง ที่ 85,200 กม.</div><div style="font-size:15px;color:#166534;font-weight:600">เชื่อม LINE แล้ว ส่งใบเสนอราคาได้ทันที</div></div>';
+    if (can && !found) h += '<div class="col" style="background:#FFF7ED;border:2px solid #FDBA74;border-radius:14px;padding:12px 14px;gap:8px"><div style="font-size:15px;font-weight:700;color:#9A3412">ลูกค้าใหม่ — ใส่ชื่อเล่นพอ (ไม่บังคับ)</div><input id="cus" class="inp" data-in="cusName" value="' + esc(S.cusName) + '" aria-label="ชื่อลูกค้า" placeholder="ชื่อลูกค้า เช่น พี่ต้น"><div style="font-size:14px;color:#7C2D12">ระบบจะส่ง QR ให้ลูกค้าสแกนเพิ่มเพื่อน LINE ของอู่</div></div>';
+    h += '</section><section class="col" style="gap:10px"><div class="step"><span class="num">2</span>ถ่ายรูปรอบคัน <span style="font-size:15px;font-weight:500;color:#475569">(' + pc + '/6)</span></div><div class="g3">';
+    SHOTS.forEach(function (k) {
+      var on = !!S.shots[k];
+      h += '<button data-act="shot" data-v="' + k + '" aria-pressed="' + on + '" style="height:86px;border-radius:14px;border:2px ' + (on ? 'solid #1E3A8A' : 'dashed #93C5FD') + ';background:' + (on ? '#1E3A8A' : '#fff') + ';color:' + (on ? '#fff' : '#1E3A8A') + ';display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:15px;font-weight:600">' + I.cam + (on ? '✓ ' : '') + k + '</button>';
+    });
+    h += '</div></section><section class="col" style="gap:10px"><div class="step"><span class="num">3</span>อาการเสีย (เลือกได้หลายข้อ)</div><div class="g2">';
+    PRESETS.forEach(function (p) {
+      var on = !!S.sym[p[0]];
+      h += '<button data-act="sym" data-v="' + p[0] + '" aria-pressed="' + on + '" style="min-height:58px;border-radius:14px;border:3px solid ' + (on ? '#F97316' : '#E2E8F0') + ';background:' + (on ? '#FFF7ED' : '#fff') + ';color:' + (on ? '#7C2D12' : '#0F172A') + ';font-size:17px;font-weight:600;padding:6px 8px;line-height:1.2">' + (on ? '✓ ' : '') + p[0] + '</button>';
+    });
+    h += '</div><label for="km" style="font-size:16px;color:#334155;margin-top:4px">เลขไมล์ (กม.) — ใช้ตั้งเตือนเช็กระยะ</label><input id="km" class="inp" type="tel" data-in="km" value="' + esc(S.km) + '" placeholder="เช่น 95000" style="font-size:20px"></section>' +
+      '<button data-act="submit" ' + (can ? '' : 'disabled') + ' style="min-height:68px;border-radius:16px;border:none;background:' + (can ? '#F97316' : '#E2E8F0') + ';color:' + (can ? '#1C1917' : '#64748B') + ';font-size:20px;font-weight:700;padding:8px 12px;line-height:1.25">เปิดใบรับรถ + ส่งใบเสนอราคาเข้า LINE<br><span style="font-size:15px;font-weight:500">' +
+      (can ? 'รูป ' + pc + ' · อาการ ' + sc + ' ข้อ · ตั้งเตือนเช็กระยะ 6 เดือนให้อัตโนมัติ' : 'ใส่เลขทะเบียนก่อน') + '</span></button></div>';
+    return h;
+  }
+
+  function line() {
+    var pend = S.jobs.filter(function (j) { return j.status === 'quote'; });
+    var lj = find(S.lineId) || pend[0];
+    var h = '<div class="col" style="gap:14px"><div class="row" style="background:#DCFCE7;border-radius:12px;padding:10px 12px;font-size:15px;color:#14532D;gap:8px">' + I.chat('#15803D', 22) + '<span>มุมมองลูกค้า: หน้าเว็บที่เปิดจากลิงก์ในแชต LINE ไม่ต้องโหลดแอป</span></div>';
+    var chips = S.jobs.filter(function (j) { return j.status === 'quote' || (lj && j.id === lj.id); });
+    if (chips.length > 1) {
+      h += '<div class="row" style="gap:8px;flex-wrap:wrap"><span style="font-size:14px;color:#475569">เลือกรถ:</span>';
+      chips.forEach(function (j) { var on = lj && j.id === lj.id; h += '<button class="chip" data-act="openLine" data-v="' + j.id + '" style="border-color:#1E3A8A;background:' + (on ? '#1E3A8A' : '#fff') + ';color:' + (on ? '#fff' : '#1E3A8A') + '">' + esc(j.plate) + '</button>'; });
+      h += '</div>';
+    }
+    if (lj) {
+      h += '<div style="background:#fff;border-radius:18px;border:1px solid #E2E8F0;overflow:hidden"><div style="background:#1E3A8A;color:#fff;padding:14px 16px"><div style="font-size:14px;color:#DBEAFE">ใบเสนอราคา · อู่ช่างเอก</div><div style="font-size:22px;font-weight:700">' + esc(lj.plate) + ' · ' + esc(lj.car) + '</div><div style="font-size:15px;color:#DBEAFE">เรียน ' + esc(lj.cus) + '</div></div>' +
+        '<div class="col" style="padding:14px 16px;gap:12px"><div style="font-size:16px;font-weight:600">รูปจุดที่เสีย</div><div class="g2">';
+      lj.pics.forEach(function (p) { h += '<div style="height:104px;border-radius:12px;background:repeating-linear-gradient(135deg,#E2E8F0 0 10px,#CBD5E1 10px 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#334155;font-size:14px;font-weight:600;text-align:center;padding:6px">' + I.img + esc(p) + '</div>'; });
+      h += '</div><div class="col">';
+      lj.items.forEach(function (i) { h += '<div class="row" style="justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed #CBD5E1;font-size:16px"><span style="line-height:1.3">' + esc(i.name) + '</span><span style="font-weight:600;white-space:nowrap">฿' + money(i.price) + '</span></div>'; });
+      h += '<div class="row" style="justify-content:space-between;padding-top:12px;font-size:22px;font-weight:700;color:#1E3A8A"><span>รวมทั้งหมด</span><span>฿' + money(total(lj)) + '</span></div></div>';
+      if (lj.status === 'quote') {
+        h += '<div class="col" style="gap:10px;margin-top:4px"><button data-act="approve" data-v="' + lj.id + '" style="height:66px;border-radius:16px;border:none;background:#15803D;color:#fff;font-size:22px;font-weight:700">อนุมัติซ่อม</button>' +
+          '<button data-act="call" style="height:54px;border-radius:16px;border:2px solid #1E3A8A;background:#fff;color:#1E3A8A;font-size:18px;font-weight:600">โทรสอบถามอู่</button></div>';
+      } else {
+        h += '<div style="background:#ECFDF5;border-radius:14px;padding:12px 14px;font-size:17px;font-weight:600;color:#166534">✓ อนุมัติแล้ว — อู่จะแจ้งทาง LINE ทุกครั้งที่สถานะเปลี่ยน</div>';
+      }
+      var cur = lj.status === 'quote' ? 1 : (lj.status === 'done' ? 3 : 2);
+      var labels = ['รับรถเข้าอู่แล้ว', 'อนุมัติซ่อม', lj.status === 'parts' ? 'รออะไหล่' : 'กำลังซ่อม', 'ซ่อมเสร็จ พร้อมรับรถ'];
+      var cc = lj.status === 'quote' ? '#F97316' : ST[lj.status].bg;
+      h += '<div class="col" style="margin-top:4px"><div style="font-size:16px;font-weight:600;margin-bottom:8px">สถานะรถของคุณ</div>';
+      labels.forEach(function (l, i) {
+        var done = i < cur || (lj.status === 'done' && i === 3), isCur = i === cur && !done;
+        var col = done ? '#15803D' : isCur ? cc : '#CBD5E1';
+        h += '<div class="row" style="gap:12px;min-height:40px"><div style="width:24px;height:24px;border-radius:12px;background:' + (done || isCur ? col : '#fff') + ';border:3px solid ' + col + ';flex-shrink:0"></div><div style="font-size:17px;color:' + (done || isCur ? '#0F172A' : '#64748B') + ';font-weight:' + (isCur ? 700 : 500) + '">' + l + (isCur ? ' ← ตอนนี้' : '') + '</div></div>';
+      });
+      h += '</div></div></div>';
+    } else {
+      h += '<div style="text-align:center;padding:32px 12px;color:#475569;font-size:17px">ยังไม่มีใบเสนอราคา<br>เปิดใบรับรถใหม่ที่ปุ่ม <b style="color:#1E3A8A">รับรถ</b></div>';
+    }
+    h += '<div class="col" style="background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:14px;gap:10px;align-items:center;text-align:center">' +
+      '<div style="font-size:13px;color:#475569">ระบบโดย <b style="color:#1E3A8A">เพื่อนช่าง</b> · ในเครือ <b style="color:#1E3A8A">JOE ระบบงานง่ายๆ</b></div>' +
+      '<div style="font-size:15px">เป็นเจ้าของอู่? อยากได้ระบบแบบนี้บ้าง</div>' +
+      '<a href="https://line.me/R/ti/p/@920hqdqw" target="_blank" rel="noopener" style="width:100%;height:54px;border-radius:14px;background:#F97316;color:#1C1917;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none">' + I.chat('#1C1917', 22) + 'ทดลองใช้ฟรี 30 วัน · แอด LINE JOE</a>' +
+      '<div style="font-size:13px;color:#475569">LINE: @920hqdqw</div></div></div>';
+    return h;
+  }
+
+  function profit() {
+    var pj = S.jobs.filter(function (j) { return j.status !== 'quote'; });
+    function calc(j) {
+      var rev = total(j), parts = 0, labor = 0;
+      j.items.forEach(function (i) { if (i.type === 'part') parts += i.cost; else labor += i.cost; });
+      return { rev: rev, parts: parts, labor: labor, net: rev - parts - labor };
+    }
+    function pct(a, b) { return b ? Math.round(a / b * 100) : 0; }
+    var T = { rev: 0, parts: 0, labor: 0, net: 0 };
+    pj.forEach(function (j) { var c = calc(j); for (var k in T) T[k] += c[k]; });
+    var h = '<div class="col" style="gap:14px"><div class="row" style="justify-content:space-between;gap:8px"><h1 class="h1">กำไรวันนี้</h1><button class="chip" data-act="hide" style="border-color:#1E3A8A;background:#fff;color:#1E3A8A;font-size:15px">' + (S.hide ? 'แสดงยอด' : 'ซ่อนยอด') + '</button></div>' +
+      '<div class="col" style="background:#1E3A8A;border-radius:18px;padding:16px;color:#fff;gap:10px"><div style="font-size:15px;color:#DBEAFE">กำไรสุทธิ ' + pj.length + ' คัน (เฉพาะเจ้าของอู่)</div>' +
+      '<div class="row" style="align-items:baseline;gap:10px"><span style="font-size:38px;font-weight:700;line-height:1.1">฿' + money(T.net) + '</span><span style="font-size:18px;font-weight:700;background:#F97316;color:#1C1917;border-radius:10px;padding:2px 10px">' + pct(T.net, T.rev) + '%</span></div>' +
+      '<div class="g3" style="font-size:13px;color:#DBEAFE"><div>รายรับ<div style="font-size:17px;font-weight:600;color:#fff">฿' + money(T.rev) + '</div></div><div>ต้นทุนอะไหล่<div style="font-size:17px;font-weight:600;color:#fff">฿' + money(T.parts) + '</div></div><div>ค่าแรงช่าง<div style="font-size:17px;font-weight:600;color:#fff">฿' + money(T.labor) + '</div></div></div></div>' +
+      '<div class="row" style="gap:14px;font-size:14px;color:#334155;flex-wrap:wrap"><span class="row" style="gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#1E3A8A"></span>อะไหล่</span><span class="row" style="gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#93C5FD"></span>ค่าแรงช่าง</span><span class="row" style="gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#15803D"></span>กำไร</span></div>';
+    pj.forEach(function (j) {
+      var c = calc(j), s = ST[j.status];
+      h += '<article class="card" style="gap:10px"><div class="row" style="justify-content:space-between;gap:8px"><div><div style="font-size:20px;font-weight:700">' + esc(j.plate) + '</div><div style="font-size:14px;color:#475569">' + esc(j.car) + '</div></div><div style="padding:3px 10px;border-radius:10px;background:' + s.bg + ';color:' + s.fg + ';font-size:14px;font-weight:600">' + s.label + '</div></div>' +
+        '<div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:#E2E8F0"><div style="width:' + (c.parts / c.rev * 100) + '%;background:#1E3A8A"></div><div style="width:' + (c.labor / c.rev * 100) + '%;background:#93C5FD"></div><div style="width:' + (c.net / c.rev * 100) + '%;background:#15803D"></div></div>' +
+        '<div class="g2" style="gap:4px 12px;font-size:15px;color:#334155"><span>ราคาขาย</span><span style="text-align:right;font-weight:600;color:#0F172A">฿' + money(c.rev) + '</span><span>− ต้นทุนอะไหล่</span><span style="text-align:right">฿' + money(c.parts) + '</span><span>− ค่าแรงช่าง</span><span style="text-align:right">฿' + money(c.labor) + '</span></div>' +
+        '<div class="row" style="justify-content:space-between;align-items:baseline;border-top:2px solid #F1F5F9;padding-top:8px"><span style="font-size:17px;font-weight:600">กำไรสุทธิ</span><span style="font-size:24px;font-weight:700;color:#15803D">฿' + money(c.net) + ' <span style="font-size:16px">(' + pct(c.net, c.rev) + '%)</span></span></div></article>';
+    });
+    return h + '<div style="font-size:14px;color:#475569;line-height:1.5">นับเฉพาะรถที่ลูกค้าอนุมัติแล้ว ลองไปกด "อนุมัติซ่อม" ในหน้าลูกค้า แล้วกลับมาดูตัวเลขเปลี่ยน</div><div style="text-align:center;font-size:13px;color:#475569;padding-top:6px">เพื่อนช่าง · ในเครือ <b style="color:#1E3A8A">JOE ระบบงานง่ายๆ</b></div></div>';
+  }
+
+  function navbar() {
+    var pend = S.jobs.filter(function (j) { return j.status === 'quote'; }).length;
+    function c(k) { return S.screen === k ? '#1E3A8A' : '#64748B'; }
+    return '<nav>' +
+      '<button data-act="go" data-v="dash" style="color:' + c('dash') + '"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>หน้าอู่</button>' +
+      '<button data-act="go" data-v="in" style="color:' + c('in') + '"><span style="width:44px;height:36px;border-radius:12px;background:#F97316;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>รับรถ</button>' +
+      '<button data-act="go" data-v="line" style="color:' + c('line') + '">' + I.chat('currentColor', 28) + 'ลูกค้า LINE' + (pend ? '<span style="position:absolute;top:2px;right:18px;min-width:22px;height:22px;border-radius:11px;background:#DC2626;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">' + pend + '</span>' : '') + '</button>' +
+      '<button data-act="go" data-v="profit" style="color:' + c('profit') + '"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>กำไร</button></nav>';
+  }
+
+  var app = document.getElementById('app'), lastScreen = S.screen;
+  function render() {
+    var a = document.activeElement, fid = a && a.id, pos = a && a.selectionStart;
+    var main = app.querySelector('main'), top = main ? main.scrollTop : 0;
+    var body = { dash: dash, 'in': checkin, line: line, profit: profit }[S.screen]();
+    app.innerHTML = header() + '<main>' + body + '</main>' + (S.toast ? '<div class="toast" role="status">' + esc(S.toast) + '</div>' : '') + navbar();
+    var m = app.querySelector('main');
+    m.scrollTop = lastScreen === S.screen ? top : 0;
+    lastScreen = S.screen;
+    if (fid) { var el = document.getElementById(fid); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+
+  function submit() {
+    var found = norm(S.plate) === 'กข1234';
+    var picked = PRESETS.filter(function (p) { return S.sym[p[0]]; });
+    var items = [];
+    picked.forEach(function (p) { items = items.concat(it(p[1])); });
+    if (!items.length) items = it([['ค่าตรวจเช็กเบื้องต้น', 'labor', 300, 100]]);
+    var shots = SHOTS.filter(function (k) { return S.shots[k]; });
+    var pics = S.shots['จุดที่เสีย'] ? picked.map(function (p) { return 'จุดเสีย: ' + p[0]; }) : [];
+    var d = new Date(), id = 'j' + S.n;
+    var job = {
+      id: id, plate: S.plate.trim(), prov: found ? 'สุรินทร์' : 'ทะเบียนใหม่', car: found ? 'Toyota Vios สีเทา' : 'รถลูกค้าใหม่',
+      cus: found ? 'คุณสมชาย' : (S.cusName.trim() || 'ลูกค้าใหม่'),
+      sym: picked.length ? picked.map(function (p) { return p[0]; }).join(', ') : 'ตรวจเช็กทั่วไป', status: 'quote',
+      time: ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2),
+      pics: pics.length ? pics : ['รูปรอบคัน ' + shots.length + ' รูป'], items: items
+    };
+    S.jobs = [job].concat(S.jobs);
+    S.n++; S.plate = ''; S.km = ''; S.cusName = ''; S.shots = {}; S.sym = {}; S.screen = 'dash'; S.filter = 'all'; S.q = ''; S.lineId = id;
+    say('เปิดใบรับรถ ' + job.plate + ' แล้ว · ส่งใบเสนอราคาเข้า LINE ' + job.cus + ' แล้ว');
+  }
+
+  app.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (!b || b.disabled) return;
+    var v = b.getAttribute('data-v'), act = b.getAttribute('data-act');
+    if (act === 'go') set({ screen: v });
+    else if (act === 'filter') set({ filter: v });
+    else if (act === 'openLine') set({ screen: 'line', lineId: v });
+    else if (act === 'status') {
+      var j = find(v), s = b.getAttribute('data-s');
+      if (j.status === s) return;
+      j.status = s;
+      say('ส่ง LINE แจ้ง' + j.cus + ' แล้ว: ' + j.plate + ' "' + ST[s].label + '"');
+    } else if (act === 'approve') {
+      var k = find(v); k.status = 'repair';
+      say(k.cus + ' กดอนุมัติแล้ว · หน้าอู่เปลี่ยน ' + k.plate + ' เป็น "กำลังซ่อม" ทันที');
+    } else if (act === 'fill') set({ plate: v });
+    else if (act === 'shot') { S.shots[v] = !S.shots[v]; render(); }
+    else if (act === 'sym') { S.sym[v] = !S.sym[v]; render(); }
+    else if (act === 'submit') submit();
+    else if (act === 'hide') set({ hide: !S.hide });
+    else if (act === 'call') say('โหมดทดลอง: ของจริงจะโทรหาอู่ทันที');
+  });
+  app.addEventListener('input', function (e) {
+    var k = e.target.getAttribute('data-in');
+    if (!k) return;
+    var val = e.target.value;
+    if (k === 'km') val = val.replace(/[^0-9]/g, '');
+    S[k] = val;
+    if (k === 'q' || k === 'plate') render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
