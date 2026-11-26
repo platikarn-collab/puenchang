@@ -63,38 +63,171 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     parts: { label: 'รออะไหล่', bg: '#DC2626', fg: '#FFFFFF' },
     done: { label: 'ซ่อมเสร็จ', bg: '#15803D', fg: '#FFFFFF' }
   };
-  var PRESETS = [
-    ['เบรกมีเสียง', [['ผ้าเบรกหน้า (คู่)', 'part', 1200, 750], ['ค่าแรงเปลี่ยนผ้าเบรก', 'labor', 300, 120]]],
-    ['แอร์ไม่เย็น', [['น้ำยาแอร์ + เช็กรั่ว', 'part', 900, 450], ['ค่าแรงระบบแอร์', 'labor', 400, 150]]],
-    ['เปลี่ยนน้ำมันเครื่อง', [['น้ำมันเครื่อง 4 ลิตร + กรอง', 'part', 1500, 980], ['ค่าแรงถ่ายน้ำมัน', 'labor', 150, 60]]],
-    ['เครื่องสั่น', [['หัวเทียน (ชุด)', 'part', 1200, 700], ['ค่าแรงเช็กเครื่องยนต์', 'labor', 500, 200]]],
-    ['ไฟเตือนขึ้น', [['สแกนโค้ดหาสาเหตุ', 'labor', 300, 50]]],
-    ['ยางสึก / รั่ว', [['ปะยาง + สลับยาง', 'labor', 200, 80]]],
-    ['แบตเตอรี่หมด', [['แบตเตอรี่ใหม่', 'part', 2500, 1800], ['ค่าแรงเปลี่ยนแบต', 'labor', 100, 30]]],
-    ['ช่วงล่างดัง', [['ลูกหมากปีกนก (คู่)', 'part', 1800, 1100], ['ค่าแรงช่วงล่าง', 'labor', 600, 250]]]
-  ];
-  var CATALOG = [
-    ['น้ำมันเครื่อง 4 ลิตร', 'part', 1200, 780], ['กรองน้ำมันเครื่อง', 'part', 250, 120], ['กรองอากาศ', 'part', 350, 180],
-    ['น้ำมันเบรก', 'part', 300, 150], ['ล้างหัวฉีด', 'labor', 800, 300], ['ล้างแอร์', 'labor', 900, 350],
-    ['ค่าแรงทั่วไป', 'labor', 300, 120], ['ปะยาง', 'labor', 150, 40]
-  ];
   var SHOTS = ['ด้านหน้า', 'ด้านหลัง', 'ด้านซ้าย', 'ด้านขวา', 'เลขไมล์', 'จุดที่เสีย'];
-  var WEEK = [['จ.', 3200], ['อ.', 4100], ['พ.', 2800], ['พฤ.', 5200], ['ศ.', 4600], ['ส.', 6100]];
   function it(a) { return a.map(function (x) { return { name: x[0], type: x[1], price: x[2], cost: x[3] }; }); }
+  var PRESETS = [], CATALOG = [];
+  var WEEK = [['จ.', 3200], ['อ.', 4100], ['พ.', 2800], ['พฤ.', 5200], ['ศ.', 4600], ['ส.', 6100]];
+  function J(id, plate, prov, car, cus, sym, status, time, pics, items, extra) { var o = { id: id, plate: plate, prov: prov, car: car, cus: cus, sym: sym, status: status, time: time, pics: pics, items: it(items) }; for (var k in (extra || {})) o[k] = extra[k]; return o; }
+  var ORDER = ['gen', 'body', 'air', 'gear', 'diesel', 'moto'];
+  var TYPES = {
+    gen: { name: 'อู่ซ่อมทั่วไป', icon: '🔧', desc: 'เครื่องยนต์ เบรก ช่วงล่าง ระบบไฟ', shop: 'อู่ช่างเอก', wk: 1, symLabel: 'อาการเสีย (เลือกได้หลายข้อ)', symShort: 'อาการ',
+      old: { cus: 'คุณสมชาย ใจดี', car: 'Toyota Vios สีเทา', last: 'เปลี่ยนน้ำมันเครื่อง ที่ 85,200 กม.' },
+      remRule: 'ทุก 6 เดือน หรือ 10,000 กม. แล้วแต่อะไรถึงก่อน', remDays: 180, remLast: 'เปลี่ยนน้ำมันเครื่อง',
+      remMsg: 'ถึงรอบเช็กระยะแล้วครับ<br>เปลี่ยนน้ำมันเครื่องรอบนี้ รับส่วนลดค่าแรง 10% 🔧',
+      remCars: ['Toyota Vios สีเทา', 'Nissan Almera สีขาว', 'Honda Jazz สีฟ้า', 'Ford Ranger สีส้ม'],
+      presets: [
+        ['เบรกมีเสียง', [['ผ้าเบรกหน้า (คู่)', 'part', 1200, 750], ['ค่าแรงเปลี่ยนผ้าเบรก', 'labor', 300, 120]]],
+        ['แอร์ไม่เย็น', [['น้ำยาแอร์ + เช็กรั่ว', 'part', 900, 450], ['ค่าแรงระบบแอร์', 'labor', 400, 150]]],
+        ['เปลี่ยนน้ำมันเครื่อง', [['น้ำมันเครื่อง 4 ลิตร + กรอง', 'part', 1500, 980], ['ค่าแรงถ่ายน้ำมัน', 'labor', 150, 60]]],
+        ['เครื่องสั่น', [['หัวเทียน (ชุด)', 'part', 1200, 700], ['ค่าแรงเช็กเครื่องยนต์', 'labor', 500, 200]]],
+        ['ไฟเตือนขึ้น', [['สแกนโค้ดหาสาเหตุ', 'labor', 300, 50]]],
+        ['ยางสึก / รั่ว', [['ปะยาง + สลับยาง', 'labor', 200, 80]]],
+        ['แบตเตอรี่หมด', [['แบตเตอรี่ใหม่', 'part', 2500, 1800], ['ค่าแรงเปลี่ยนแบต', 'labor', 100, 30]]],
+        ['ช่วงล่างดัง', [['ลูกหมากปีกนก (คู่)', 'part', 1800, 1100], ['ค่าแรงช่วงล่าง', 'labor', 600, 250]]]
+      ],
+      catalog: [['น้ำมันเครื่อง 4 ลิตร', 'part', 1200, 780], ['กรองน้ำมันเครื่อง', 'part', 250, 120], ['กรองอากาศ', 'part', 350, 180], ['น้ำมันเบรก', 'part', 300, 150], ['ล้างหัวฉีด', 'labor', 800, 300], ['ล้างแอร์', 'labor', 900, 350], ['ค่าแรงทั่วไป', 'labor', 300, 120], ['ปะยาง', 'labor', 150, 40]],
+      jobs: function () { return [
+        J('j1', '1กท 5678', 'กรุงเทพมหานคร', 'Honda City สีขาว', 'คุณวิภา', 'เบรกมีเสียง', 'repair', '08:15', ['ผ้าเบรกหน้าสึก'], [['ผ้าเบรกหน้า (คู่)', 'part', 1200, 750], ['เจียรจานเบรก', 'labor', 600, 200], ['ค่าแรงเปลี่ยนผ้าเบรก', 'labor', 300, 120]]),
+        J('j2', 'ขม 9012', 'สุรินทร์', 'Isuzu D-Max สีเทา', 'คุณประเสริฐ', 'แอร์ไม่เย็น', 'parts', '09:40', ['คอมแอร์รั่ว'], [['คอมเพรสเซอร์แอร์ (รีบิลต์)', 'part', 6500, 4200], ['น้ำยาแอร์', 'part', 900, 450], ['ค่าแรงระบบแอร์', 'labor', 1200, 500]]),
+        J('j3', '3กก 3456', 'กรุงเทพมหานคร', 'Toyota Yaris สีแดง', 'คุณนภา', 'เช็กระยะ 40,000 กม.', 'done', '07:50', ['ไส้กรองอากาศเก่า'], [['น้ำมันเครื่อง 4 ลิตร + กรอง', 'part', 1500, 980], ['ไส้กรองอากาศ', 'part', 350, 180], ['ค่าแรงเช็กระยะ', 'labor', 500, 200]]),
+        J('j4', 'บว 7788', 'สุรินทร์', 'Mitsubishi Triton สีดำ', 'คุณสมศักดิ์', 'ช่วงล่างดัง, ยางสึก', 'quote', '10:20', ['ลูกหมากปีกนกหลวม', 'ยางหน้าสึกขอบ'], [['ลูกหมากปีกนกล่าง (คู่)', 'part', 1800, 1100], ['ยางหน้า 265/65R17 (2 เส้น)', 'part', 6400, 5000], ['ค่าแรงช่วงล่าง + ตั้งศูนย์', 'labor', 1200, 500]])
+      ]; }
+    },
+    body: { name: 'อู่เคาะ-พ่นสี', icon: '🎨', desc: 'ตัวถัง ทำสี งานเคลมประกัน', shop: 'ช่างเอกเคาะพ่นสี', wk: 3, symLabel: 'ชิ้นที่เสียหาย (เลือกได้หลายชิ้น)', symShort: 'งาน', repairLabel: 'กำลังทำสี',
+      stages: ['รื้อ', 'เคาะ', 'โป๊ว/พื้น', 'พ่นสี', 'ขัดเงา', 'ประกอบ'],
+      old: { cus: 'คุณสมชาย ใจดี', car: 'Toyota Vios สีเทา', last: 'ทำสีกันชนหน้า (เคลมประกัน)' },
+      remRule: 'ชวนลูกค้ากลับมาขัดสี-เคลือบแก้วทุก 1 ปี', remDays: 365, remLast: 'ทำสี/เคลือบแก้ว',
+      remMsg: 'ครบปีหลังทำสีแล้วครับ<br>ขัดเงา + เคลือบแก้ว ให้สีเงาเหมือนวันแรก ✨',
+      remCars: ['Toyota Vios สีเทา', 'Honda Civic สีขาว', 'Mazda 2 สีแดง', 'Toyota Fortuner สีดำ'], remDaysList: [-20, 9, 21, 160],
+      presets: [
+        ['กันชนหน้า', [['เคาะ/โป๊ว/พ่นสี กันชนหน้า', 'labor', 3500, 1300], ['สี + วัสดุ กันชนหน้า', 'part', 900, 550]]],
+        ['กันชนหลัง', [['เคาะ/โป๊ว/พ่นสี กันชนหลัง', 'labor', 3500, 1300], ['สี + วัสดุ กันชนหลัง', 'part', 900, 550]]],
+        ['ประตูหน้าซ้าย', [['เคาะ/พ่นสี ประตูหน้าซ้าย', 'labor', 4000, 1500], ['สี + วัสดุ ประตู', 'part', 1000, 600]]],
+        ['ประตูหน้าขวา', [['เคาะ/พ่นสี ประตูหน้าขวา', 'labor', 4000, 1500], ['สี + วัสดุ ประตู', 'part', 1000, 600]]],
+        ['แก้มหน้า', [['เคาะ/พ่นสี แก้มหน้า', 'labor', 3000, 1100], ['สี + วัสดุ แก้ม', 'part', 800, 500]]],
+        ['ฝากระโปรงหน้า', [['พ่นสี ฝากระโปรงหน้า', 'labor', 4500, 1700], ['สี + วัสดุ ฝากระโปรง', 'part', 1200, 750]]],
+        ['รอยขีดข่วนรอบคัน', [['ขัดลบรอย + เคลือบ', 'labor', 2500, 700], ['น้ำยาขัด', 'part', 400, 200]]],
+        ['ทำสีทั้งคัน', [['ทำสีทั้งคัน', 'labor', 25000, 10000], ['สี + วัสดุทั้งคัน', 'part', 9000, 6000]]]
+      ],
+      catalog: [['สีพื้น (ต่อชิ้น)', 'part', 400, 220], ['ผสมสีให้ตรงรุ่น', 'labor', 500, 150], ['ขัดเงา (ต่อชิ้น)', 'labor', 800, 250], ['เคลือบแก้ว', 'labor', 4500, 1500], ['คิ้ว/กิ๊บล็อก', 'part', 250, 120], ['ไฟหน้า (ข้าง)', 'part', 3500, 2400], ['รื้อ-ประกอบชิ้นส่วน', 'labor', 800, 300], ['ค่าแรงทั่วไป', 'labor', 500, 200]],
+      jobs: function () { return [
+        J('j1', 'กท 9090', 'กรุงเทพมหานคร', 'Toyota Corolla Cross สีขาว', 'คุณศิริพร', 'ประตูหน้าซ้ายบุบ · เคลมประกันชั้น 1', 'repair', '08:00', ['ประตูหน้าซ้ายบุบ'], [['เคาะ/พ่นสี ประตูหน้าซ้าย', 'labor', 4000, 1500], ['สี + วัสดุ ประตู', 'part', 1000, 600]], { stage: 3 }),
+        J('j2', 'ขบ 4545', 'สุรินทร์', 'Honda City สีน้ำเงิน', 'คุณมาลี', 'กันชนหน้า + ไฟหน้าแตก', 'parts', '08:40', ['กันชนหน้าแตก', 'ไฟหน้าร้าว'], [['เคาะ/โป๊ว/พ่นสี กันชนหน้า', 'labor', 3500, 1300], ['สี + วัสดุ กันชนหน้า', 'part', 900, 550], ['ไฟหน้า (ข้าง)', 'part', 3500, 2400]], { stage: 1 }),
+        J('j3', 'งง 1212', 'สุรินทร์', 'Mazda CX-5 สีแดง', 'คุณธนา', 'รอยขีดข่วนรอบคัน', 'done', '07:30', ['รอยขีดข่วนประตู'], [['ขัดลบรอย + เคลือบ', 'labor', 2500, 700], ['น้ำยาขัด', 'part', 400, 200]]),
+        J('j4', 'ฉฉ 3434', 'บุรีรัมย์', 'Isuzu MU-X สีดำ', 'คุณกิตติ', 'กันชนหลัง, แก้มหน้า · เคลมประกัน', 'quote', '10:10', ['กันชนหลังบุบ', 'แก้มหน้าถลอก'], [['เคาะ/โป๊ว/พ่นสี กันชนหลัง', 'labor', 3500, 1300], ['สี + วัสดุ กันชนหลัง', 'part', 900, 550], ['เคาะ/พ่นสี แก้มหน้า', 'labor', 3000, 1100], ['สี + วัสดุ แก้ม', 'part', 800, 500]])
+      ]; }
+    },
+    air: { name: 'ร้านแอร์รถยนต์', icon: '❄️', desc: 'ล้างแอร์ เติมน้ำยา คอมแอร์', shop: 'ช่างเอกแอร์', wk: 1.2, symLabel: 'อาการแอร์ (เลือกได้หลายข้อ)', symShort: 'อาการ',
+      old: { cus: 'คุณสมชาย ใจดี', car: 'Toyota Vios สีเทา', last: 'ล้างตู้แอร์ ที่ 80,100 กม.' },
+      remRule: 'ล้างแอร์ทุก 1 ปี หรือ 20,000 กม.', remDays: 365, remLast: 'ล้างแอร์',
+      remMsg: 'ถึงรอบล้างแอร์แล้วครับ<br>แอร์สะอาด เย็นฉ่ำ หายกลิ่นอับ ❄️',
+      remCars: ['Toyota Vios สีเทา', 'Honda Civic สีขาว', 'Toyota Fortuner สีดำ', 'Mazda 2 สีแดง'], remDaysList: [-10, 7, 18, 150],
+      presets: [
+        ['แอร์ไม่เย็น', [['เติมน้ำยาแอร์ + เช็กรั่ว', 'part', 900, 450], ['ค่าแรงตรวจระบบแอร์', 'labor', 400, 150]]],
+        ['ล้างตู้แอร์', [['ล้างตู้แอร์ (ไม่ถอดคอนโซล)', 'labor', 2500, 900], ['น้ำยาล้าง', 'part', 300, 120]]],
+        ['แอร์มีกลิ่น', [['ไส้กรองแอร์คาร์บอน', 'part', 450, 200], ['ฆ่าเชื้อระบบแอร์', 'labor', 500, 150]]],
+        ['คอมแอร์ดัง', [['คอมเพรสเซอร์แอร์ (รีบิลต์)', 'part', 6500, 4200], ['ค่าแรงเปลี่ยนคอม', 'labor', 1200, 500]]],
+        ['น้ำยาแอร์รั่ว', [['โอริง + วาล์วแอร์', 'part', 400, 150], ['ค่าแรงหารั่ว + ซ่อม', 'labor', 800, 300]]],
+        ['พัดลมไม่หมุน', [['มอเตอร์พัดลมหม้อน้ำ', 'part', 1800, 1100], ['ค่าแรงเปลี่ยนพัดลม', 'labor', 400, 150]]],
+        ['แอร์ตัดบ่อย', [['สวิตช์แรงดันแอร์', 'part', 900, 450], ['ค่าแรงตรวจไฟฟ้าแอร์', 'labor', 500, 200]]],
+        ['เปลี่ยนไส้กรองแอร์', [['ไส้กรองแอร์', 'part', 350, 150]]]
+      ],
+      catalog: [['น้ำยาแอร์ R134a', 'part', 700, 350], ['ไส้กรองแอร์', 'part', 350, 150], ['ล้างคอยล์ร้อน', 'labor', 500, 150], ['ล้างตู้แอร์', 'labor', 2500, 900], ['ค่าแรงตรวจแอร์', 'labor', 300, 100], ['สเปรย์ฆ่าเชื้อ', 'part', 250, 90], ['โอริงชุด', 'part', 200, 60], ['ค่าแรงทั่วไป', 'labor', 300, 120]],
+      jobs: function () { return [
+        J('j1', 'กท 4521', 'กรุงเทพมหานคร', 'Toyota Fortuner สีดำ', 'คุณอนันต์', 'ล้างตู้แอร์', 'repair', '08:30', ['ตู้แอร์สกปรก'], [['ล้างตู้แอร์ (ไม่ถอดคอนโซล)', 'labor', 2500, 900], ['น้ำยาล้าง', 'part', 300, 120], ['ไส้กรองแอร์', 'part', 350, 150]]),
+        J('j2', '2ขค 889', 'สุรินทร์', 'Honda Civic สีขาว', 'คุณปวีณา', 'คอมแอร์ดัง', 'parts', '09:10', ['คอมแอร์มีเสียง'], [['คอมเพรสเซอร์แอร์ (รีบิลต์)', 'part', 6500, 4200], ['ค่าแรงเปลี่ยนคอม', 'labor', 1200, 500]]),
+        J('j3', 'บข 3012', 'สุรินทร์', 'Toyota Hilux Vigo สีเงิน', 'คุณบุญมา', 'แอร์ไม่เย็น', 'done', '07:45', ['เกจวัดน้ำยาแอร์'], [['เติมน้ำยาแอร์ + เช็กรั่ว', 'part', 900, 450], ['ค่าแรงตรวจระบบแอร์', 'labor', 400, 150]]),
+        J('j4', 'ฒข 7700', 'บุรีรัมย์', 'Mazda 2 สีแดง', 'คุณกมล', 'แอร์มีกลิ่น, น้ำยาแอร์รั่ว', 'quote', '10:05', ['คอยล์เย็นมีคราบ', 'จุดรั่วที่ท่อแอร์'], [['ไส้กรองแอร์คาร์บอน', 'part', 450, 200], ['ฆ่าเชื้อระบบแอร์', 'labor', 500, 150], ['โอริง + วาล์วแอร์', 'part', 400, 150], ['ค่าแรงหารั่ว + ซ่อม', 'labor', 800, 300]])
+      ]; }
+    },
+    gear: { name: 'อู่เกียร์', icon: '⚙️', desc: 'เกียร์ออโต้ เกียร์ธรรมดา คลัตช์', shop: 'ช่างเอกเกียร์ออโต้', wk: 2.2, symLabel: 'อาการเกียร์ (เลือกได้หลายข้อ)', symShort: 'อาการ',
+      old: { cus: 'คุณสมชาย ใจดี', car: 'Toyota Vios สีเทา', last: 'เปลี่ยนน้ำมันเกียร์ ที่ 80,000 กม.' },
+      remRule: 'เปลี่ยนน้ำมันเกียร์ทุก 40,000 กม. หรือ 2 ปี', remDays: 730, remLast: 'เปลี่ยนน้ำมันเกียร์',
+      remMsg: 'ถึงรอบเปลี่ยนน้ำมันเกียร์แล้วครับ<br>เกียร์นุ่ม ไม่กระตุก ยืดอายุเกียร์ ⚙️',
+      remCars: ['Toyota Vios สีเทา', 'Toyota Camry สีดำ', 'Honda Jazz สีเหลือง', 'Nissan March สีฟ้า'], remDaysList: [-15, 8, 20, 300],
+      presets: [
+        ['เกียร์กระตุก', [['น้ำมันเกียร์ออโต้ ATF', 'part', 2200, 1300], ['ค่าแรงถ่าย + ฟลัชชิ่ง', 'labor', 800, 300]]],
+        ['เกียร์ลื่น/รอรอบ', [['ชุดซ่อมคลัตช์เกียร์ออโต้', 'part', 8500, 5200], ['ค่าแรงผ่าเกียร์', 'labor', 6000, 2500]]],
+        ['เกียร์ไม่เข้า', [['โซลินอยด์เกียร์', 'part', 3500, 2000], ['ค่าแรงตรวจ + เปลี่ยน', 'labor', 1500, 600]]],
+        ['ไฟเกียร์โชว์', [['สแกนโค้ดเกียร์', 'labor', 500, 100]]],
+        ['มีเสียงหอน', [['ลูกปืนเกียร์', 'part', 2400, 1400], ['ค่าแรงถอดเกียร์', 'labor', 3000, 1200]]],
+        ['คลัตช์หมด', [['ชุดคลัตช์ (จาน+หวี+ลูกปืน)', 'part', 5500, 3500], ['ค่าแรงเปลี่ยนคลัตช์', 'labor', 2500, 1000]]],
+        ['น้ำมันเกียร์รั่ว', [['ซีลเกียร์ + ปะเก็นอ่าง', 'part', 900, 400], ['ค่าแรงเปลี่ยนซีล', 'labor', 800, 300]]],
+        ['เปลี่ยนน้ำมันเกียร์', [['น้ำมันเกียร์ 4 ลิตร', 'part', 1600, 950], ['ค่าแรงถ่ายน้ำมันเกียร์', 'labor', 300, 100]]]
+      ],
+      catalog: [['น้ำมันเกียร์ ATF 1 ลิตร', 'part', 400, 240], ['กรองน้ำมันเกียร์', 'part', 800, 450], ['ปะเก็นอ่างเกียร์', 'part', 450, 200], ['ฟลัชชิ่งเกียร์', 'labor', 800, 300], ['สแกนโค้ดเกียร์', 'labor', 500, 100], ['ลองขับทดสอบ', 'labor', 200, 50], ['ซีลเพลาขับ', 'part', 350, 150], ['ค่าแรงทั่วไป', 'labor', 300, 120]],
+      jobs: function () { return [
+        J('j1', '5กฎ 1188', 'กรุงเทพมหานคร', 'Toyota Camry สีดำ', 'คุณสมพร', 'เกียร์กระตุก', 'repair', '08:20', ['น้ำมันเกียร์ดำ'], [['น้ำมันเกียร์ออโต้ ATF', 'part', 2200, 1300], ['กรองน้ำมันเกียร์', 'part', 800, 450], ['ค่าแรงถ่าย + ฟลัชชิ่ง', 'labor', 800, 300]]),
+        J('j2', 'ขต 5521', 'สุรินทร์', 'Honda Jazz สีเหลือง', 'คุณน้ำฝน', 'เกียร์ลื่น/รอรอบ', 'parts', '09:30', ['ผ้าคลัตช์เกียร์ไหม้'], [['ชุดซ่อมคลัตช์เกียร์ออโต้', 'part', 8500, 5200], ['ค่าแรงผ่าเกียร์', 'labor', 6000, 2500]]),
+        J('j3', 'ภก 2290', 'สุรินทร์', 'Isuzu D-Max สีขาว', 'คุณเสถียร', 'คลัตช์หมด', 'done', '07:40', ['จานคลัตช์สึก'], [['ชุดคลัตช์ (จาน+หวี+ลูกปืน)', 'part', 5500, 3500], ['ค่าแรงเปลี่ยนคลัตช์', 'labor', 2500, 1000]]),
+        J('j4', 'ษษ 4412', 'ศรีสะเกษ', 'Nissan March สีฟ้า', 'คุณพิมพ์', 'ไฟเกียร์โชว์, เกียร์ไม่เข้า', 'quote', '10:15', ['โค้ดเกียร์ขึ้นหน้าปัด', 'ปลั๊กโซลินอยด์'], [['สแกนโค้ดเกียร์', 'labor', 500, 100], ['โซลินอยด์เกียร์', 'part', 3500, 2000], ['ค่าแรงตรวจ + เปลี่ยน', 'labor', 1500, 600]])
+      ]; }
+    },
+    diesel: { name: 'อู่ดีเซล / รถใหญ่', icon: '🚚', desc: 'กระบะ รถบรรทุก หัวฉีด เทอร์โบ', shop: 'ช่างเอกดีเซล', wk: 1.8, symLabel: 'อาการเสีย (เลือกได้หลายข้อ)', symShort: 'อาการ',
+      old: { cus: 'คุณสมชาย ใจดี', car: 'Toyota Hilux Revo สีเทา', last: 'เปลี่ยนน้ำมันเครื่อง + กรองโซล่า ที่ 150,200 กม.' },
+      remRule: 'ทุก 10,000 กม. หรือ 6 เดือน (รถบรรทุกนับตามเลขไมล์)', remDays: 180, remLast: 'เปลี่ยนน้ำมันเครื่อง + กรอง',
+      remMsg: 'ถึงรอบเปลี่ยนน้ำมันเครื่อง + กรองโซล่าแล้วครับ<br>รถวิ่งงานไม่สะดุด ประหยัดน้ำมัน 🚚',
+      remCars: ['Toyota Hilux Revo สีเทา', 'Hino 500 รถหกล้อ', 'Isuzu NPR รถหกล้อ', 'Ford Ranger สีส้ม'],
+      presets: [
+        ['ควันดำ', [['ล้างหัวฉีด (ชุด)', 'labor', 3500, 1200], ['กรองอากาศ', 'part', 650, 350]]],
+        ['สตาร์ทติดยาก', [['หัวเผา (ชุด)', 'part', 2400, 1400], ['ค่าแรงเปลี่ยนหัวเผา', 'labor', 600, 250]]],
+        ['เครื่องไม่มีแรง', [['กรองโซล่า', 'part', 550, 280], ['ค่าแรงไล่ระบบเชื้อเพลิง', 'labor', 800, 300]]],
+        ['เทอร์โบมีเสียง', [['ซ่อมเทอร์โบ (รีบิลต์)', 'part', 9500, 6000], ['ค่าแรงถอดประกอบเทอร์โบ', 'labor', 2000, 800]]],
+        ['ความร้อนขึ้น', [['ปั๊มน้ำ', 'part', 2200, 1300], ['น้ำยาหล่อเย็น', 'part', 500, 250], ['ค่าแรงเปลี่ยนปั๊มน้ำ', 'labor', 1200, 500]]],
+        ['ปั๊มโซล่าเสีย', [['ซ่อมปั๊มโซล่า', 'part', 7500, 4500], ['ค่าแรงถอดประกอบปั๊ม', 'labor', 2500, 1000]]],
+        ['เปลี่ยนน้ำมันเครื่อง', [['น้ำมันเครื่องดีเซล 7 ลิตร + กรอง', 'part', 2300, 1500], ['ค่าแรงถ่ายน้ำมัน', 'labor', 200, 80]]],
+        ['ลมเบรกรั่ว (รถใหญ่)', [['วาล์วลมเบรก', 'part', 2800, 1700], ['ค่าแรงซ่อมระบบลม', 'labor', 1500, 600]]]
+      ],
+      catalog: [['กรองโซล่า', 'part', 550, 280], ['กรองน้ำมันเครื่อง', 'part', 350, 180], ['กรองอากาศ', 'part', 650, 350], ['น้ำมันเครื่องดีเซล 1 ลิตร', 'part', 280, 180], ['หัวเผา (ตัว)', 'part', 600, 350], ['ล้างหัวฉีด', 'labor', 3500, 1200], ['ไล่ลมระบบน้ำมัน', 'labor', 300, 100], ['ค่าแรงทั่วไป', 'labor', 400, 150]],
+      jobs: function () { return [
+        J('j1', '70-1234', 'สุรินทร์', 'Hino 500 รถหกล้อ', 'หจก.ขนส่งสุรินทร์', 'ลมเบรกรั่ว (รถใหญ่)', 'repair', '07:30', ['วาล์วลมรั่ว'], [['วาล์วลมเบรก', 'part', 2800, 1700], ['ค่าแรงซ่อมระบบลม', 'labor', 1500, 600]]),
+        J('j2', 'บฉ 6610', 'สุรินทร์', 'Toyota Hilux Revo สีเทา', 'คุณชาตรี', 'เทอร์โบมีเสียง', 'parts', '08:50', ['ใบเทอร์โบสึก'], [['ซ่อมเทอร์โบ (รีบิลต์)', 'part', 9500, 6000], ['ค่าแรงถอดประกอบเทอร์โบ', 'labor', 2000, 800]]),
+        J('j3', '71-5678', 'บุรีรัมย์', 'Isuzu NPR รถหกล้อ', 'คุณทองดี', 'เปลี่ยนน้ำมันเครื่อง', 'done', '07:10', ['น้ำมันเครื่องเก่า'], [['น้ำมันเครื่องดีเซล 7 ลิตร + กรอง', 'part', 2300, 1500], ['กรองโซล่า', 'part', 550, 280], ['ค่าแรงถ่ายน้ำมัน', 'labor', 200, 80]]),
+        J('j4', 'ฆฆ 3003', 'สุรินทร์', 'Ford Ranger สีส้ม', 'คุณวีระ', 'ควันดำ, สตาร์ทติดยาก', 'quote', '10:00', ['หัวฉีดมีคราบ', 'หัวเผาขาด'], [['ล้างหัวฉีด (ชุด)', 'labor', 3500, 1200], ['กรองอากาศ', 'part', 650, 350], ['หัวเผา (ชุด)', 'part', 2400, 1400], ['ค่าแรงเปลี่ยนหัวเผา', 'labor', 600, 250]])
+      ]; }
+    },
+    moto: { name: 'อู่มอเตอร์ไซค์', icon: '🏍️', desc: 'น้ำมันเครื่อง ยาง โซ่ เบรก', shop: 'ช่างเอกมอเตอร์', wk: 0.12, symLabel: 'อาการ / งาน (เลือกได้หลายข้อ)', symShort: 'อาการ',
+      old: { cus: 'คุณสมชาย ใจดี', car: 'Honda Wave 125i สีแดง', last: 'เปลี่ยนน้ำมันเครื่อง ที่ 12,400 กม.' },
+      remRule: 'เปลี่ยนน้ำมันเครื่องทุก 3 เดือน หรือ 3,000 กม.', remDays: 90, remLast: 'เปลี่ยนน้ำมันเครื่อง',
+      remMsg: 'ถึงรอบเปลี่ยนน้ำมันเครื่องแล้วครับ<br>ขี่ลื่น เครื่องไม่พังก่อนวัย 🏍️',
+      remCars: ['Honda Wave 125i สีแดง', 'Yamaha Fino สีชมพู', 'Honda Click สีดำ', 'Honda PCX สีเทา'], remDaysList: [-5, 4, 12, 60],
+      presets: [
+        ['เปลี่ยนน้ำมันเครื่อง', [['น้ำมันเครื่อง 0.8 ลิตร', 'part', 180, 110], ['ค่าแรงถ่ายน้ำมัน', 'labor', 20, 5]]],
+        ['ยางรั่ว', [['ปะยาง', 'labor', 80, 20]]],
+        ['เปลี่ยนยาง', [['ยางนอก + ยางใน', 'part', 650, 420], ['ค่าแรงเปลี่ยนยาง', 'labor', 50, 10]]],
+        ['โซ่สเตอร์', [['ชุดโซ่สเตอร์', 'part', 650, 400], ['ค่าแรงเปลี่ยนโซ่', 'labor', 100, 30]]],
+        ['ผ้าเบรก', [['ผ้าเบรกหน้า', 'part', 180, 90], ['ค่าแรงเปลี่ยนผ้าเบรก', 'labor', 50, 10]]],
+        ['สตาร์ทไม่ติด', [['หัวเทียน', 'part', 90, 45], ['ค่าแรงตรวจระบบไฟ', 'labor', 100, 30]]],
+        ['แบตหมด', [['แบตเตอรี่มอไซค์', 'part', 650, 450], ['ค่าแรงเปลี่ยนแบต', 'labor', 30, 5]]],
+        ['ล้างหัวฉีด/คาร์บู', [['ล้างหัวฉีด', 'labor', 300, 80], ['น้ำยาล้าง', 'part', 80, 35]]]
+      ],
+      catalog: [['น้ำมันเครื่อง 0.8 ลิตร', 'part', 180, 110], ['น้ำมันเฟืองท้าย', 'part', 60, 30], ['หัวเทียน', 'part', 90, 45], ['ผ้าเบรก', 'part', 180, 90], ['สายพาน (ออโต้)', 'part', 450, 280], ['ไส้กรองอากาศ', 'part', 150, 80], ['ปะยาง', 'labor', 80, 20], ['ค่าแรงทั่วไป', 'labor', 50, 10]],
+      jobs: function () { return [
+        J('j1', '1กข 234', 'สุรินทร์', 'Honda Wave 110i สีแดง', 'น้องบอส', 'โซ่สเตอร์', 'repair', '08:10', ['โซ่ยืด'], [['ชุดโซ่สเตอร์', 'part', 650, 400], ['ค่าแรงเปลี่ยนโซ่', 'labor', 100, 30]]),
+        J('j2', '2ขค 561', 'สุรินทร์', 'Yamaha NMAX สีดำ', 'คุณเอก', 'สายพานขาด', 'parts', '09:00', ['สายพานแตก'], [['สายพาน (ออโต้)', 'part', 450, 280], ['เม็ดตุ้ม', 'part', 250, 140], ['ค่าแรงชุดขับ', 'labor', 150, 40]]),
+        J('j3', '3กง 778', 'สุรินทร์', 'Honda Click สีขาว', 'คุณแพร', 'เปลี่ยนน้ำมันเครื่อง', 'done', '07:55', ['น้ำมันเครื่องเก่า'], [['น้ำมันเครื่อง 0.8 ลิตร', 'part', 180, 110], ['น้ำมันเฟืองท้าย', 'part', 60, 30], ['ค่าแรงถ่ายน้ำมัน', 'labor', 20, 5]]),
+        J('j4', '4กจ 902', 'สุรินทร์', 'Honda PCX สีเทา', 'คุณต้น', 'ผ้าเบรก, เปลี่ยนยาง', 'quote', '10:25', ['ผ้าเบรกหมด', 'ยางหลังสึก'], [['ผ้าเบรกหน้า', 'part', 180, 90], ['ค่าแรงเปลี่ยนผ้าเบรก', 'labor', 50, 10], ['ยางนอก + ยางใน', 'part', 650, 420], ['ค่าแรงเปลี่ยนยาง', 'labor', 50, 10]])
+      ]; }
+    }
+  };
+  function T() { return TYPES[S.type] || TYPES.gen; }
+  function SHOP() { return T().shop; }
+  function makeRems(t) {
+    var names = ['คุณสมชาย ใจดี', 'คุณมานพ', 'คุณสุดา', 'คุณวีระ'], plates = ['กข 1234', '4กข 2211', 'งจ 4567', 'ผษ 8899'];
+    var dates = ['12 พ.ค. 2569', '1 มิ.ย. 2569', '10 มิ.ย. 2569', '20 ก.ย. 2569'], days = t.remDaysList || [-13, 6, 15, 115];
+    return names.map(function (n, i) { return { id: 'r' + (i + 1), cus: n, car: t.remCars[i], plate: plates[i], last: t.remLast + ' ' + dates[i], days: days[i] }; });
+  }
+  function setType(t) {
+    var X = TYPES[t];
+    S.type = t; PRESETS = X.presets; CATALOG = X.catalog; ST.repair.label = X.repairLabel || 'กำลังซ่อม';
+    S.jobs = X.jobs(); S.rems = makeRems(X);
+    S.plate = ''; S.km = ''; S.cusName = ''; S.shots = {}; S.sym = {}; S.filter = 'all'; S.q = ''; S.lineId = 'j4'; S.billId = null; S.n = 5; S.screen = 'dash';
+    try { localStorage.setItem('pc_type', t); } catch (e) {}
+    try { history.replaceState(null, '', '?type=' + t); } catch (e) {}
+  }
   var S = {
-    screen: 'dash', filter: 'all', q: '', plate: '', km: '', cusName: '', shots: {}, sym: {}, lineId: 'j4', billId: null, hide: false, toast: '', n: 5, billNo: 1012,
-    jobs: [
-      { id: 'j1', plate: '1กท 5678', prov: 'กรุงเทพมหานคร', car: 'Honda City สีขาว', cus: 'คุณวิภา', sym: 'เบรกมีเสียง', status: 'repair', time: '08:15', pics: ['ผ้าเบรกหน้าสึก'], items: it([['ผ้าเบรกหน้า (คู่)', 'part', 1200, 750], ['เจียรจานเบรก', 'labor', 600, 200], ['ค่าแรงเปลี่ยนผ้าเบรก', 'labor', 300, 120]]) },
-      { id: 'j2', plate: 'ขม 9012', prov: 'สุรินทร์', car: 'Isuzu D-Max สีเทา', cus: 'คุณประเสริฐ', sym: 'แอร์ไม่เย็น', status: 'parts', time: '09:40', pics: ['คอมแอร์รั่ว'], items: it([['คอมเพรสเซอร์แอร์ (รีบิลต์)', 'part', 6500, 4200], ['น้ำยาแอร์', 'part', 900, 450], ['ค่าแรงระบบแอร์', 'labor', 1200, 500]]) },
-      { id: 'j3', plate: '3กก 3456', prov: 'กรุงเทพมหานคร', car: 'Toyota Yaris สีแดง', cus: 'คุณนภา', sym: 'เช็กระยะ 40,000 กม.', status: 'done', time: '07:50', pics: ['ไส้กรองอากาศเก่า'], items: it([['น้ำมันเครื่อง 4 ลิตร + กรอง', 'part', 1500, 980], ['ไส้กรองอากาศ', 'part', 350, 180], ['ค่าแรงเช็กระยะ', 'labor', 500, 200]]) },
-      { id: 'j4', plate: 'บว 7788', prov: 'สุรินทร์', car: 'Mitsubishi Triton สีดำ', cus: 'คุณสมศักดิ์', sym: 'ช่วงล่างดัง, ยางสึก', status: 'quote', time: '10:20', pics: ['ลูกหมากปีกนกหลวม', 'ยางหน้าสึกขอบ'], items: it([['ลูกหมากปีกนกล่าง (คู่)', 'part', 1800, 1100], ['ยางหน้า 265/65R17 (2 เส้น)', 'part', 6400, 5000], ['ค่าแรงช่วงล่าง + ตั้งศูนย์', 'labor', 1200, 500]]) }
-    ],
-    rems: [
-      { id: 'r1', cus: 'คุณสมชาย ใจดี', car: 'Toyota Vios สีเทา', plate: 'กข 1234', last: 'เปลี่ยนน้ำมันเครื่อง 12 พ.ค. 2569 · 85,200 กม.', days: -13 },
-      { id: 'r2', cus: 'คุณมานพ', car: 'Nissan Almera สีขาว', plate: '4กข 2211', last: 'เช็กระยะ 1 มิ.ย. 2569 · 60,100 กม.', days: 6 },
-      { id: 'r3', cus: 'คุณสุดา', car: 'Honda Jazz สีฟ้า', plate: 'งจ 4567', last: 'เปลี่ยนน้ำมันเครื่อง 10 มิ.ย. 2569 · 42,800 กม.', days: 15 },
-      { id: 'r4', cus: 'คุณวีระ', car: 'Ford Ranger สีส้ม', plate: 'ผษ 8899', last: 'เช็กระยะ 20 ก.ย. 2569 · 110,500 กม.', days: 115 }
-    ]
+    screen: 'pick', filter: 'all', q: '', plate: '', km: '', cusName: '', shots: {}, sym: {}, lineId: 'j4', billId: null, hide: false, toast: '', n: 5, billNo: 1012,
+    jobs: [], rems: [], type: null
   };
   var timer;
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -129,12 +262,12 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
   };
 
   function header() {
-    var sub = { dash: 'หน้าหลัก', 'in': 'รับรถ', line: 'ฝั่งลูกค้า', profit: 'เจ้าของอู่', bill: 'ออกบิล', remind: 'เตือนเช็กระยะ' }[S.screen];
+    var sub = { dash: 'หน้าหลัก', 'in': 'รับรถ', line: 'ฝั่งลูกค้า', profit: 'เจ้าของอู่', bill: 'ออกบิล', remind: 'เตือนเช็กระยะ', pick: 'เลือกประเภทร้าน' }[S.screen];
     return '<header><div style="width:44px;height:44px;border-radius:12px;background:#F97316;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + I.wrench + '</div>' +
       '<div style="flex:1;min-width:0"><div style="font-size:22px;font-weight:700;color:#fff;line-height:1.2">เพื่อนช่าง <span style="font-size:14px;font-weight:500;color:#BFDBFE">PuenChang</span></div>' +
       '<div style="font-size:13px;color:#DBEAFE;line-height:1.3">ผู้ช่วยจัดการอู่ยุคใหม่ กดง่ายใน 3 คลิก</div>' +
       '<div style="font-size:12px;color:#FDBA74;font-weight:600;line-height:1.3;margin-top:2px">ในเครือ JOE · ระบบงานง่ายๆ</div></div>' +
-      '<div style="font-size:13px;color:#DBEAFE;text-align:right;line-height:1.3">อู่ช่างเอก<br>' + sub + '</div></header>' +
+      (S.type ? '<button data-act="go" data-v="pick" style="border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);border-radius:12px;color:#fff;font-size:13px;line-height:1.3;padding:6px 8px;text-align:right;max-width:120px">' + T().icon + ' ' + SHOP() + '<br><span style="color:#FDBA74;font-weight:600">เปลี่ยนประเภท ▾</span></button>' : '') + '</header>' +
       '<div class="demo">โหมดทดลอง · ข้อมูลตัวอย่าง กดเล่นได้ทุกปุ่ม</div>';
   }
 
@@ -155,7 +288,7 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
       h += '<article class="card"><div class="row" style="gap:12px;align-items:flex-start"><div class="plate"><div style="font-size:24px;font-weight:700;line-height:1.2">' + esc(j.plate) + '</div><div style="font-size:12px;color:#334155;line-height:1.2">' + esc(j.prov) + '</div></div>' +
         '<div style="flex:1;min-width:0"><div style="display:inline-block;padding:3px 10px;border-radius:10px;background:' + s.bg + ';color:' + s.fg + ';font-size:15px;font-weight:600">' + s.label + (j.paid ? ' · ชำระแล้ว' : '') + '</div>' +
         '<div style="font-size:16px;font-weight:600;margin-top:4px;line-height:1.3">' + esc(j.car) + '</div><div style="font-size:14px;color:#475569">' + esc(j.cus) + ' · เข้า ' + j.time + ' น.</div></div></div>' +
-        '<div style="font-size:16px;color:#334155;background:#F1F5F9;border-radius:10px;padding:8px 12px">อาการ: ' + esc(j.sym) + '</div>';
+        '<div style="font-size:16px;color:#334155;background:#F1F5F9;border-radius:10px;padding:8px 12px">' + T().symShort + ': ' + esc(j.sym) + '</div>';
       if (j.status === 'quote') {
         h += '<div style="font-size:15px;color:#1E3A8A">ส่งใบเสนอราคา ฿' + money(total(j)) + ' เข้า LINE แล้ว · รอลูกค้ากดอนุมัติ</div>' +
           '<button data-act="openLine" data-v="' + j.id + '" style="height:54px;border-radius:14px;border:2px solid #1E3A8A;background:#fff;color:#1E3A8A;font-size:18px;font-weight:600">ดูหน้าที่ลูกค้าเห็นใน LINE</button>';
@@ -163,11 +296,16 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
         h += '<button data-act="bill" data-v="' + j.id + '" style="height:54px;border-radius:14px;border:2px solid #15803D;background:#ECFDF5;color:#166534;font-size:17px;font-weight:700">✓ รับเงินแล้ว ฿' + money(total(j) - disc(j)) + ' · ดูใบเสร็จ</button>';
       } else {
         h += '<div class="g3">';
-        [['repair', 'กำลังซ่อม'], ['parts', 'รออะไหล่'], ['done', 'ซ่อมเสร็จ']].forEach(function (b) {
+        [['repair', ST.repair.label], ['parts', 'รออะไหล่'], ['done', 'ซ่อมเสร็จ']].forEach(function (b) {
           var on = j.status === b[0], c = ST[b[0]];
           h += '<button data-act="status" data-v="' + j.id + '" data-s="' + b[0] + '" aria-pressed="' + on + '" style="height:58px;border-radius:14px;border:3px solid ' + (on ? c.bg : '#E2E8F0') + ';background:' + (on ? c.bg : '#fff') + ';color:' + (on ? c.fg : '#334155') + ';font-size:16px;font-weight:700;padding:0 4px">' + b[1] + '</button>';
         });
         h += '</div>';
+        if (T().stages && j.status !== 'done') {
+          h += '<div class="col" style="gap:6px"><div style="font-size:14px;color:#475569">ขั้นตอนงานสี · แตะเพื่ออัปเดต + ส่งรูปเข้า LINE ลูกค้า</div><div class="row" style="gap:6px;overflow-x:auto;padding-bottom:2px">';
+          T().stages.forEach(function (sg, i) { var st = j.stage || 0, dn = i < st, cu = i === st; h += '<button data-act="stage" data-v="' + j.id + '" data-s="' + i + '" style="flex-shrink:0;height:42px;padding:0 12px;border-radius:21px;border:2px solid ' + (cu ? '#F97316' : dn ? '#15803D' : '#E2E8F0') + ';background:' + (cu ? '#FFF7ED' : dn ? '#ECFDF5' : '#fff') + ';color:' + (cu ? '#9A3412' : dn ? '#166534' : '#475569') + ';font-size:15px;font-weight:600">' + (dn ? '✓ ' : '') + sg + '</button>'; });
+          h += '</div></div>';
+        }
         if (j.status === 'done') h += '<button data-act="bill" data-v="' + j.id + '" class="big" style="background:#F97316;color:#1C1917;display:flex;align-items:center;justify-content:center;gap:8px">' + I.receipt + 'ออกบิล รับเงิน ฿' + money(total(j)) + '</button>';
       }
       h += '</article>';
@@ -186,7 +324,7 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
       '<div class="row" style="gap:8px;flex-wrap:wrap"><span style="font-size:14px;color:#475569">ลองกด:</span>' +
       '<button class="chip" data-act="fill" data-v="กข 1234" style="border-color:#1E3A8A;background:#EFF6FF;color:#1E3A8A">กข 1234 (ลูกค้าเก่า)</button>' +
       '<button class="chip" data-act="fill" data-v="ฮต 4455" style="border-color:#CBD5E1;background:#fff;color:#334155">ลูกค้าใหม่</button></div>';
-    if (found) h += '<div class="col" style="background:#ECFDF5;border:2px solid #15803D;border-radius:14px;padding:12px 14px;gap:4px"><div style="font-size:15px;font-weight:700;color:#166534">✓ เจอประวัติลูกค้าเก่า ดึงข้อมูลให้แล้ว</div><div style="font-size:18px;font-weight:600">คุณสมชาย ใจดี · 089-555-1234</div><div style="font-size:16px;color:#334155">Toyota Vios สีเทา · สุรินทร์</div><div style="font-size:15px;color:#334155">ครั้งล่าสุด 12 พ.ค. 2569 — เปลี่ยนน้ำมันเครื่อง ที่ 85,200 กม.</div><div style="font-size:15px;color:#166534;font-weight:600">เชื่อม LINE แล้ว ส่งใบเสนอราคาได้ทันที</div></div>';
+    if (found) h += '<div class="col" style="background:#ECFDF5;border:2px solid #15803D;border-radius:14px;padding:12px 14px;gap:4px"><div style="font-size:15px;font-weight:700;color:#166534">✓ เจอประวัติลูกค้าเก่า ดึงข้อมูลให้แล้ว</div><div style="font-size:18px;font-weight:600">' + T().old.cus + ' · 089-555-1234</div><div style="font-size:16px;color:#334155">' + T().old.car + ' · สุรินทร์</div><div style="font-size:15px;color:#334155">ครั้งล่าสุด 12 พ.ค. 2569 — ' + T().old.last + '</div><div style="font-size:15px;color:#166534;font-weight:600">เชื่อม LINE แล้ว ส่งใบเสนอราคาได้ทันที</div></div>';
     if (can && !found) h += '<div class="col" style="background:#FFF7ED;border:2px solid #FDBA74;border-radius:14px;padding:12px 14px;gap:8px"><div style="font-size:15px;font-weight:700;color:#9A3412">ลูกค้าใหม่ — ใส่ชื่อเล่นพอ (ไม่บังคับ)</div><input id="cus" class="inp" data-in="cusName" value="' + esc(S.cusName) + '" aria-label="ชื่อลูกค้า" placeholder="ชื่อลูกค้า เช่น พี่ต้น"><div style="font-size:14px;color:#7C2D12">ระบบจะส่ง QR ให้ลูกค้าสแกนเพิ่มเพื่อน LINE ของอู่</div></div>';
     h += '</section><section class="col" style="gap:10px"><div class="step"><span class="num">2</span>ถ่ายรูปรอบคัน <span style="font-size:15px;font-weight:500;color:#475569">(' + pc + '/6)</span></div><div class="g3">';
     SHOTS.forEach(function (k) {
@@ -195,7 +333,7 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
         (src ? '<span style="position:absolute;left:0;right:0;bottom:0;background:rgba(15,23,42,.75);color:#fff;padding:4px 0;text-align:center">✓ ' + k + '</span>' : I.cam + k) +
         '<input type="file" accept="image/*" capture="environment" data-shot="' + k + '" aria-label="ถ่ายรูป' + k + '" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none"></label>';
     });
-    h += '</div><div style="font-size:14px;color:#475569">แตะช่องเพื่อเปิดกล้อง · แตะซ้ำเพื่อถ่ายใหม่</div></section><section class="col" style="gap:10px"><div class="step"><span class="num">3</span>อาการเสีย (เลือกได้หลายข้อ)</div><div class="g2">';
+    h += '</div><div style="font-size:14px;color:#475569">แตะช่องเพื่อเปิดกล้อง · แตะซ้ำเพื่อถ่ายใหม่</div></section><section class="col" style="gap:10px"><div class="step"><span class="num">3</span>' + T().symLabel + '</div><div class="g2">';
     PRESETS.forEach(function (p) {
       var on = !!S.sym[p[0]];
       h += '<button data-act="sym" data-v="' + p[0] + '" aria-pressed="' + on + '" style="min-height:58px;border-radius:14px;border:3px solid ' + (on ? '#F97316' : '#E2E8F0') + ';background:' + (on ? '#FFF7ED' : '#fff') + ';color:' + (on ? '#7C2D12' : '#0F172A') + ';font-size:17px;font-weight:600;padding:6px 8px;line-height:1.2">' + (on ? '✓ ' : '') + p[0] + '</button>';
@@ -217,7 +355,7 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
       h += '</div>';
     }
     if (lj) {
-      h += '<div style="background:#fff;border-radius:18px;border:1px solid #E2E8F0;overflow:hidden"><div style="background:#1E3A8A;color:#fff;padding:14px 16px"><div style="font-size:14px;color:#DBEAFE">ใบเสนอราคา · อู่ช่างเอก</div><div style="font-size:22px;font-weight:700">' + esc(lj.plate) + ' · ' + esc(lj.car) + '</div><div style="font-size:15px;color:#DBEAFE">เรียน ' + esc(lj.cus) + '</div></div>' +
+      h += '<div style="background:#fff;border-radius:18px;border:1px solid #E2E8F0;overflow:hidden"><div style="background:#1E3A8A;color:#fff;padding:14px 16px"><div style="font-size:14px;color:#DBEAFE">ใบเสนอราคา · ' + SHOP() + '</div><div style="font-size:22px;font-weight:700">' + esc(lj.plate) + ' · ' + esc(lj.car) + '</div><div style="font-size:15px;color:#DBEAFE">เรียน ' + esc(lj.cus) + '</div></div>' +
         '<div class="col" style="padding:14px 16px;gap:12px"><div style="font-size:16px;font-weight:600">รูปจุดที่เสีย</div><div class="g2">';
       lj.pics.forEach(function (p) {
         if (typeof p === 'string') p = { label: p };
@@ -226,7 +364,7 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
       });
       h += '</div><div class="col">';
       lj.items.forEach(function (i) { h += '<div class="row" style="justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed #CBD5E1;font-size:16px"><span style="line-height:1.3">' + esc(i.name) + '</span><span style="font-weight:600;white-space:nowrap">฿' + money(i.price) + '</span></div>'; });
-      h += '<div class="row" style="justify-content:space-between;padding-top:12px;font-size:22px;font-weight:700;color:#1E3A8A"><span>รวมทั้งหมด</span><span>฿' + money(total(lj)) + '</span></div></div>';
+      h += '<div class="row" style="justify-content:space-between;padding-top:12px;font-size:22px;font-weight:700;color:#1E3A8A"><span>รวมทั้งหมด</span><span>฿' + money(total(lj)) + '</span></div></div>' + (/เคลม/.test(lj.sym) ? '<div style="background:#EFF6FF;border-radius:12px;padding:10px 12px;font-size:15px;color:#1E3A8A;line-height:1.45">🛡 งานเคลมประกัน: ส่งสำเนาใบเสนอราคาให้บริษัทประกันแล้ว ลูกค้าจ่ายเฉพาะค่าเสียหายส่วนแรก (ถ้ามี)</div>' : '');
       if (lj.status === 'quote') {
         h += '<div class="col" style="gap:10px;margin-top:4px"><button data-act="approve" data-v="' + lj.id + '" style="height:66px;border-radius:16px;border:none;background:#15803D;color:#fff;font-size:22px;font-weight:700">อนุมัติซ่อม</button>' +
           '<button data-act="call" style="height:54px;border-radius:16px;border:2px solid #1E3A8A;background:#fff;color:#1E3A8A;font-size:18px;font-weight:600">โทรสอบถามอู่</button></div>';
@@ -234,11 +372,12 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
         h += '<div style="background:#ECFDF5;border-radius:14px;padding:12px 14px;font-size:17px;font-weight:600;color:#166534">✓ อนุมัติแล้ว — อู่จะแจ้งทาง LINE ทุกครั้งที่สถานะเปลี่ยน</div>';
       }
       var cur = lj.status === 'quote' ? 1 : (lj.status === 'done' ? 3 : 2);
-      var labels = ['รับรถเข้าอู่แล้ว', 'อนุมัติซ่อม', lj.status === 'parts' ? 'รออะไหล่' : 'กำลังซ่อม', 'ซ่อมเสร็จ พร้อมรับรถ'];
+      var labels = ['รับรถเข้าอู่แล้ว', 'อนุมัติซ่อม', lj.status === 'parts' ? 'รออะไหล่' : ST.repair.label, 'ซ่อมเสร็จ พร้อมรับรถ'];
+      if (T().stages) { labels = ['รับรถเข้าอู่แล้ว', 'อนุมัติซ่อม'].concat(T().stages).concat(['เสร็จ พร้อมรับรถ']); cur = lj.status === 'quote' ? 1 : lj.status === 'done' ? labels.length - 1 : 2 + (lj.stage || 0); if (lj.status === 'parts') labels[cur] += ' (รออะไหล่)'; }
       var cc = lj.status === 'quote' ? '#F97316' : ST[lj.status].bg;
       h += '<div class="col" style="margin-top:4px"><div style="font-size:16px;font-weight:600;margin-bottom:8px">สถานะรถของคุณ</div>';
       labels.forEach(function (l, i) {
-        var done = i < cur || (lj.status === 'done' && i === 3), isCur = i === cur && !done;
+        var done = i < cur || (lj.status === 'done' && i === labels.length - 1), isCur = i === cur && !done;
         var col = done ? '#15803D' : isCur ? cc : '#CBD5E1';
         h += '<div class="row" style="gap:12px;min-height:40px"><div style="width:24px;height:24px;border-radius:12px;background:' + (done || isCur ? col : '#fff') + ';border:3px solid ' + col + ';flex-shrink:0"></div><div style="font-size:17px;color:' + (done || isCur ? '#0F172A' : '#64748B') + ';font-weight:' + (isCur ? 700 : 500) + '">' + l + (isCur ? ' ← ตอนนี้' : '') + '</div></div>';
       });
@@ -250,6 +389,14 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     return h;
   }
 
+  function pick() {
+    var h = '<div class="col" style="gap:14px"><h1 class="h1">ร้านของคุณเป็นแบบไหน?</h1><div style="font-size:16px;color:#475569;margin-top:-6px;line-height:1.45">เลือกแล้ว ระบบจะปรับปุ่มอาการ อะไหล่ ราคา และการเตือนลูกค้าให้ตรงกับร้านคุณทันที</div><div class="g2">';
+    ORDER.forEach(function (k) {
+      var t = TYPES[k], on = S.type === k;
+      h += '<button data-act="type" data-v="' + k + '" style="min-height:138px;border-radius:18px;border:3px solid ' + (on ? '#F97316' : '#E2E8F0') + ';background:' + (on ? '#FFF7ED' : '#fff') + ';display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 8px;box-shadow:0 2px 8px rgba(15,23,42,.07)"><span style="font-size:42px;line-height:1" aria-hidden="true">' + t.icon + '</span><span style="font-size:17px;font-weight:700;color:#1E3A8A">' + t.name + '</span><span style="font-size:13px;color:#475569;line-height:1.3">' + t.desc + '</span></button>';
+    });
+    return h + '</div><div style="font-size:14px;color:#475569;text-align:center;line-height:1.5">ไม่เจอประเภทร้านของคุณ? ทักมาที่ LINE <b>@920hqdqw</b> เราปรับให้ได้</div>' + joeBox() + '</div>';
+  }
   function joeBox() {
     return '<div class="col" style="background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:14px;gap:10px;align-items:center;text-align:center">' +
       '<div style="font-size:13px;color:#475569">ระบบโดย <b style="color:#1E3A8A">เพื่อนช่าง</b> · ในเครือ <b style="color:#1E3A8A">JOE ระบบงานง่ายๆ</b></div>' +
@@ -265,7 +412,7 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     var t = total(j), d = disc(j), net = t - d, pay = j.pay || 'cash';
     var h = '<div class="col" style="gap:14px"><button data-act="go" data-v="dash" style="align-self:flex-start;border:none;background:none;color:#1E3A8A;font-size:16px;font-weight:600;padding:4px 0">← กลับหน้าอู่</button>' +
       '<div id="receipt" style="position:relative;filter:drop-shadow(0 4px 10px rgba(15,23,42,.12))"><div style="background:#fff;border-radius:18px 18px 0 0;padding:16px">' +
-      '<div class="row" style="gap:10px;padding-bottom:12px;border-bottom:2px dashed #E2E8F0"><div style="width:40px;height:40px;border-radius:10px;background:#F97316;display:flex;align-items:center;justify-content:center">' + I.wrench + '</div><div style="flex:1"><div style="font-size:18px;font-weight:700;color:#1E3A8A">อู่ช่างเอก</div><div style="font-size:13px;color:#475569">ใบเสร็จรับเงิน / ใบส่งของ</div></div><div style="text-align:right;font-size:13px;color:#475569">เลขที่ ' + j.no + '<br>25 พ.ย. 2569</div></div>' +
+      '<div class="row" style="gap:10px;padding-bottom:12px;border-bottom:2px dashed #E2E8F0"><div style="width:40px;height:40px;border-radius:10px;background:#F97316;display:flex;align-items:center;justify-content:center">' + I.wrench + '</div><div style="flex:1"><div style="font-size:18px;font-weight:700;color:#1E3A8A">' + SHOP() + '</div><div style="font-size:13px;color:#475569">ใบเสร็จรับเงิน / ใบส่งของ</div></div><div style="text-align:right;font-size:13px;color:#475569">เลขที่ ' + j.no + '<br>25 พ.ย. 2569</div></div>' +
       '<div class="row" style="justify-content:space-between;padding:12px 0;gap:10px"><div><div style="font-size:20px;font-weight:700">' + esc(j.plate) + '</div><div style="font-size:14px;color:#475569">' + esc(j.car) + ' · ' + esc(j.cus) + '</div></div></div>';
     j.items.forEach(function (i, idx) {
       h += '<div class="row" style="gap:8px;padding:9px 0;border-bottom:1px solid #F1F5F9;font-size:16px"><span style="flex:1;line-height:1.3">' + esc(i.name) + '</span><span style="font-weight:600;white-space:nowrap">฿' + money(i.price) + '</span>' +
@@ -308,11 +455,11 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     var sent = S.rems.filter(function (r) { return r.sent; }).length;
     var booked = S.rems.filter(function (r) { return r.booked; }).length;
     var h = '<div class="col" style="gap:14px"><h1 class="h1">เตือนเช็กระยะ</h1>' +
-      '<div style="font-size:15px;color:#475569;margin-top:-8px">ระบบนับให้เอง: ทุก 6 เดือน หรือ 10,000 กม. แล้วแต่อะไรถึงก่อน</div>' +
+      '<div style="font-size:15px;color:#475569;margin-top:-8px">ระบบนับให้เอง: ' + T().remRule + '</div>' +
       '<div class="g3">' + tile(due.length, 'ถึงกำหนด', '#DC2626') + tile(sent, 'ส่งแล้ว', '#1E3A8A') + tile(booked, 'จองคิวแล้ว', '#15803D') + '</div>';
     if (waiting.length) h += '<button data-act="remAll" class="big" style="background:#F97316;color:#1C1917;display:flex;align-items:center;justify-content:center;gap:8px">' + I.chat('#1C1917', 22) + 'ส่ง LINE ทุกคนที่ถึงกำหนด (' + waiting.length + ')</button>';
     S.rems.slice().sort(function (a, b) { return a.days - b.days; }).forEach(function (r) {
-      var pct = Math.max(4, Math.min(100, Math.round((180 - r.days) / 180 * 100)));
+      var pct = Math.max(4, Math.min(100, Math.round((T().remDays - r.days) / T().remDays * 100)));
       var col = r.days < 0 ? '#DC2626' : r.days <= 15 ? '#F97316' : '#15803D';
       var lab = r.days < 0 ? 'เลยกำหนด ' + (-r.days) + ' วัน' : r.days <= 30 ? 'อีก ' + r.days + ' วัน' : 'อีก ' + Math.round(r.days / 30) + ' เดือน';
       h += '<article class="card" style="gap:10px"><div class="row" style="justify-content:space-between;gap:8px;align-items:flex-start"><div style="min-width:0"><div style="font-size:18px;font-weight:700">' + esc(r.cus) + '</div><div style="font-size:14px;color:#475569">' + esc(r.plate) + ' · ' + esc(r.car) + '</div></div>' +
@@ -326,8 +473,8 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     });
     var ex = S.rems.filter(function (r) { return r.days <= 15; })[0] || S.rems[0];
     h += '<div class="col" style="gap:8px;background:#E0E7FF;border-radius:18px;padding:14px"><div style="font-size:15px;font-weight:600;color:#1E3A8A">ตัวอย่างข้อความที่ลูกค้าได้รับใน LINE</div>' +
-      '<div class="bubble">สวัสดีครับ ' + esc(ex.cus) + ' 🙏<br>รถ ' + esc(ex.car) + ' (' + esc(ex.plate) + ') ถึงรอบเช็กระยะแล้วครับ<br>เปลี่ยนน้ำมันเครื่องรอบนี้ รับส่วนลดค่าแรง 10% 🔧<br><b style="color:#1E3A8A">กดจองคิวด้านล่างได้เลยครับ</b><div style="margin-top:10px;background:#15803D;color:#fff;border-radius:10px;text-align:center;padding:8px;font-weight:700">จองคิว</div></div>' +
-      '<div style="font-size:13px;color:#334155">— อู่ช่างเอก (ส่งอัตโนมัติจากเพื่อนช่าง)</div></div></div>';
+      '<div class="bubble">สวัสดีครับ ' + esc(ex.cus) + ' 🙏<br>รถ ' + esc(ex.car) + ' (' + esc(ex.plate) + ') ' + T().remMsg + '<br><b style="color:#1E3A8A">กดจองคิวด้านล่างได้เลยครับ</b><div style="margin-top:10px;background:#15803D;color:#fff;border-radius:10px;text-align:center;padding:8px;font-weight:700">จองคิว</div></div>' +
+      '<div style="font-size:13px;color:#334155">— ' + SHOP() + ' (ส่งอัตโนมัติจากเพื่อนช่าง)</div></div></div>';
     return h;
   }
   function tile(n, label, col) { return '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:10px;text-align:center"><div style="font-size:28px;font-weight:700;color:' + col + ';line-height:1.1">' + n + '</div><div style="font-size:13px;color:#475569">' + label + '</div></div>'; }
@@ -340,15 +487,15 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
       return { rev: rev, parts: parts, labor: labor, net: rev - parts - labor };
     }
     function pct(a, b) { return b ? Math.round(a / b * 100) : 0; }
-    var T = { rev: 0, parts: 0, labor: 0, net: 0 };
-    pj.forEach(function (j) { var c = calc(j); for (var k in T) T[k] += c[k]; });
+    var TT = { rev: 0, parts: 0, labor: 0, net: 0 };
+    pj.forEach(function (j) { var c = calc(j); for (var k in TT) TT[k] += c[k]; });
     var paidSum = pj.filter(function (j) { return j.paid; }).reduce(function (a, j) { return a + total(j) - disc(j); }, 0);
-    var wk = WEEK.concat([['วันนี้', T.net]]), mx = Math.max.apply(null, wk.map(function (w) { return w[1]; })) || 1;
+    var wk = WEEK.map(function (w) { return [w[0], Math.round(w[1] * T().wk)]; }).concat([['วันนี้', TT.net]]), mx = Math.max.apply(null, wk.map(function (w) { return w[1]; })) || 1;
     var h = '<div class="col" style="gap:14px"><div class="row" style="justify-content:space-between;gap:8px"><h1 class="h1">กำไรวันนี้</h1><button class="chip" data-act="hide" style="border-color:#1E3A8A;background:#fff;color:#1E3A8A;font-size:15px">' + (S.hide ? 'แสดงยอด' : 'ซ่อนยอด') + '</button></div>' +
       '<div class="col" style="background:#1E3A8A;border-radius:18px;padding:16px;color:#fff;gap:10px"><div style="font-size:15px;color:#DBEAFE">กำไรสุทธิ ' + pj.length + ' คัน (เฉพาะเจ้าของอู่)</div>' +
-      '<div class="row" style="align-items:baseline;gap:10px"><span style="font-size:38px;font-weight:700;line-height:1.1">฿' + money(T.net) + '</span><span style="font-size:18px;font-weight:700;background:#F97316;color:#1C1917;border-radius:10px;padding:2px 10px">' + pct(T.net, T.rev) + '%</span></div>' +
-      '<div class="g3" style="font-size:13px;color:#DBEAFE"><div>รายรับ<div style="font-size:17px;font-weight:600;color:#fff">฿' + money(T.rev) + '</div></div><div>ต้นทุนอะไหล่<div style="font-size:17px;font-weight:600;color:#fff">฿' + money(T.parts) + '</div></div><div>ค่าแรงช่าง<div style="font-size:17px;font-weight:600;color:#fff">฿' + money(T.labor) + '</div></div></div>' +
-      '<div style="font-size:14px;color:#DBEAFE;border-top:1px solid rgba(255,255,255,.2);padding-top:8px">เงินเข้าแล้ววันนี้ <b style="color:#fff">฿' + money(paidSum) + '</b> · รอเก็บเงิน <b style="color:#FDBA74">฿' + money(T.rev - paidSum) + '</b></div></div>' +
+      '<div class="row" style="align-items:baseline;gap:10px"><span style="font-size:38px;font-weight:700;line-height:1.1">฿' + money(TT.net) + '</span><span style="font-size:18px;font-weight:700;background:#F97316;color:#1C1917;border-radius:10px;padding:2px 10px">' + pct(TT.net, TT.rev) + '%</span></div>' +
+      '<div class="g3" style="font-size:13px;color:#DBEAFE"><div>รายรับ<div style="font-size:17px;font-weight:600;color:#fff">฿' + money(TT.rev) + '</div></div><div>ต้นทุนอะไหล่<div style="font-size:17px;font-weight:600;color:#fff">฿' + money(TT.parts) + '</div></div><div>ค่าแรงช่าง<div style="font-size:17px;font-weight:600;color:#fff">฿' + money(TT.labor) + '</div></div></div>' +
+      '<div style="font-size:14px;color:#DBEAFE;border-top:1px solid rgba(255,255,255,.2);padding-top:8px">เงินเข้าแล้ววันนี้ <b style="color:#fff">฿' + money(paidSum) + '</b> · รอเก็บเงิน <b style="color:#FDBA74">฿' + money(TT.rev - paidSum) + '</b></div></div>' +
       '<div class="card" style="gap:8px"><div class="row" style="justify-content:space-between"><span style="font-size:16px;font-weight:600">กำไร 7 วัน</span><span style="font-size:12px;color:#475569">6 วันก่อนหน้าเป็นข้อมูลตัวอย่าง</span></div><div class="row" style="align-items:flex-end;gap:6px;height:120px">';
     wk.forEach(function (w, i) {
       var today = i === wk.length - 1;
@@ -384,8 +531,8 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     var a = document.activeElement, fid = a && a.id, pos = a && a.selectionStart;
     var main = app.querySelector('main'), top = main ? main.scrollTop : 0;
     var changed = lastScreen !== S.screen;
-    var body = { dash: dash, 'in': checkin, line: line, profit: profit, bill: bill, remind: remind }[S.screen]();
-    app.innerHTML = header() + '<main><div class="' + (changed ? 'enter' : '') + '">' + body + '</div></main>' + (S.toast ? '<div class="toast" role="status">' + esc(S.toast) + '</div>' : '') + navbar();
+    var body = { dash: dash, 'in': checkin, line: line, profit: profit, bill: bill, remind: remind, pick: pick }[S.screen]();
+    app.innerHTML = header() + '<main><div class="' + (changed ? 'enter' : '') + '">' + body + '</div></main>' + (S.toast ? '<div class="toast" role="status">' + esc(S.toast) + '</div>' : '') + (S.type ? navbar() : '');
     var m = app.querySelector('main');
     m.scrollTop = changed ? 0 : top;
     lastScreen = S.screen;
@@ -403,8 +550,8 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     var pics = shots.map(function (k) { return { label: k, src: S.shots[k] }; });
     var d = new Date(), id = 'j' + S.n;
     var job = {
-      id: id, plate: S.plate.trim(), prov: found ? 'สุรินทร์' : 'ทะเบียนใหม่', car: found ? 'Toyota Vios สีเทา' : 'รถลูกค้าใหม่',
-      cus: found ? 'คุณสมชาย' : (S.cusName.trim() || 'ลูกค้าใหม่'),
+      id: id, plate: S.plate.trim(), prov: found ? 'สุรินทร์' : 'ทะเบียนใหม่', car: found ? T().old.car : 'รถลูกค้าใหม่',
+      cus: found ? T().old.cus : (S.cusName.trim() || 'ลูกค้าใหม่'),
       sym: picked.length ? picked.map(function (p) { return p[0]; }).join(', ') : 'ตรวจเช็กทั่วไป', status: 'quote',
       time: ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2), km: S.km,
       pics: pics.length ? pics : [{ label: 'ยังไม่ได้ถ่ายรูป' }], items: items
@@ -429,6 +576,8 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     if (!b || b.disabled) return;
     var v = b.getAttribute('data-v'), act = b.getAttribute('data-act'), bj = find(S.billId);
     if (act === 'go') set({ screen: v });
+    else if (act === 'type') { setType(v); burst(); say(TYPES[v].icon + ' ปรับเป็น "' + TYPES[v].name + '" แล้ว · ลองกดเล่นได้ทุกปุ่ม'); }
+    else if (act === 'stage') { var sj = find(v), si = +b.getAttribute('data-s'); sj.stage = si; say('📸 ส่งรูป + สถานะ "' + T().stages[si] + '" เข้า LINE ' + sj.cus + ' แล้ว'); }
     else if (act === 'filter') set({ filter: v });
     else if (act === 'openLine') set({ screen: 'line', lineId: v });
     else if (act === 'status') {
@@ -451,7 +600,7 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     else if (act === 'pay' && bj) { bj.pay = v; render(); }
     else if (act === 'paid' && bj) {
       bj.paid = true; bj.status = 'done';
-      S.rems.push({ id: 'r' + bj.id, cus: bj.cus, car: bj.car, plate: bj.plate, last: 'ซ่อมที่อู่ 25 พ.ย. 2569' + (bj.km ? ' · ' + Number(bj.km).toLocaleString('en-US') + ' กม.' : ''), days: 180 });
+      S.rems.push({ id: 'r' + bj.id, cus: bj.cus, car: bj.car, plate: bj.plate, last: 'ซ่อมที่อู่ 25 พ.ย. 2569' + (bj.km ? ' · ' + Number(bj.km).toLocaleString('en-US') + ' กม.' : ''), days: T().remDays });
       burst();
       say('รับเงิน ฿' + money(total(bj) - disc(bj)) + ' แล้ว · ส่งใบเสร็จเข้า LINE · ตั้งเตือนเช็กระยะ 6 เดือนให้แล้ว');
     } else if (act === 'print') window.print();
@@ -476,6 +625,12 @@ nav button{border:none;background:none;display:flex;flex-direction:column;align-
     S[k] = val;
     if (k === 'q' || k === 'plate') render();
   });
+  (function init() {
+    var q = (location.search.match(/type=(\w+)/) || [])[1], saved = null;
+    try { saved = localStorage.getItem('pc_type'); } catch (e) {}
+    var t = TYPES[q] ? q : TYPES[saved] ? saved : null;
+    if (t) setType(t);
+  })();
   render();
 })();
 </script>
