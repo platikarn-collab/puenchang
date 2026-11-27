@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>เพื่อนช่างแอร์ – ทดลองใช้ | JOE ระบบงานง่ายๆ</title>
+<meta name="description" content="ระบบจัดการงานช่างแอร์บนมือถือ รับนัด ส่งยืนยันเข้า LINE ปิดงานออกบิล เตือนลูกค้าล้างแอร์ทุก 6 เดือน ในเครือ JOE ระบบงานง่ายๆ">
+<meta property="og:title" content="เพื่อนช่างแอร์ – ผู้ช่วยช่างแอร์ยุคใหม่ กดง่ายใน 3 คลิก">
+<meta property="og:description" content="ลองกดเล่นได้เลย: รับนัด · แจ้งลูกค้าทาง LINE · ออกบิล · เตือนล้างแอร์อัตโนมัติ — ในเครือ JOE ระบบงานง่ายๆ">
+<meta name="theme-color" content="#1E3A8A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1E3A8A;--orange:#F97316;--sky:#0EA5E9;--bg:#F8FAFC;--ink:#0F172A;--mute:#64748B;--line:#E2E8F0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#CBD5E1;font-family:Prompt,system-ui,sans-serif;color:var(--ink);font-size:17px;line-height:1.45}
+#app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:96px;position:relative}
+header{background:linear-gradient(135deg,#1E3A8A 0%,#1E40AF 55%,#0EA5E9 100%);color:#fff;padding:14px 16px 16px;position:sticky;top:0;z-index:5}
+.hb{display:flex;justify-content:space-between;align-items:flex-start}
+.brand{font-weight:700;font-size:19px}.brand small{font-weight:500;font-size:12px;background:rgba(255,255,255,.2);padding:2px 7px;border-radius:99px;margin-left:4px;vertical-align:middle}
+.shop{font-size:13.5px;opacity:.85}
+.rs{background:rgba(255,255,255,.18);border:0;color:#fff;font:inherit;font-size:13px;padding:6px 10px;border-radius:10px}
+h1{margin:10px 0 0;font-size:23px;font-weight:700}
+.demo{background:#FFF7ED;color:#9A3412;font-size:13px;text-align:center;padding:6px}
+.card{background:#fff;border-radius:16px;padding:14px;margin:12px;box-shadow:0 1px 3px rgba(15,23,42,.08)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px}
+.tile{background:#fff;border-radius:14px;padding:10px;text-align:center;box-shadow:0 1px 3px rgba(15,23,42,.08)}
+.tile b{display:block;font-size:22px;color:var(--navy)}.tile span{font-size:13px;color:var(--mute)}
+.time{font-size:22px;font-weight:700;color:var(--navy)}
+.nm{font-size:19px;font-weight:600;margin-top:4px}
+.sub{font-size:15px;color:var(--mute);margin-top:2px}
+.chip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:13.5px;font-weight:600;white-space:nowrap}
+.acts{display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px;margin-top:12px}
+.btn{border:0;border-radius:12px;padding:13px 12px;font:inherit;font-weight:600;font-size:16px;cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.btn.o{background:var(--orange);color:#fff}.btn.n{background:var(--navy);color:#fff}.btn.g{background:#F1F5F9;color:var(--ink)}.btn.l{background:#06C755;color:#fff}.btn.r{background:#FEE2E2;color:#B91C1C}
+.btn.block{width:100%;display:flex}.btn.big{padding:16px;font-size:18px}
+.btn:disabled{opacity:.45}
+.sec{font-size:15px;font-weight:600;color:var(--mute);margin:18px 16px 0}
+.lb{display:block;font-weight:600;margin-bottom:8px}
+.hint{font-size:13.5px;color:var(--mute);margin-top:6px}
+input,select{width:100%;font:inherit;font-size:18px;padding:12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:none;border-color:var(--sky)}
+.pick{display:flex;flex-wrap:wrap;gap:8px}
+.pick button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;font:inherit;font-size:15.5px;color:var(--ink);text-align:left}
+.pick button.on{border-color:var(--orange);background:#FFF7ED;color:#C2410C;font-weight:600}
+.pick button:disabled{opacity:.35;text-decoration:line-through}
+.pick small{display:block;font-size:12.5px;color:var(--mute);font-weight:400}
+.it{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-size:15.5px}
+.tot{display:flex;justify-content:space-between;font-weight:700;font-size:20px;padding-top:10px;color:var(--navy)}
+.chk{display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid #F1F5F9;font-size:16.5px;cursor:pointer}
+.box{width:28px;height:28px;border-radius:8px;border:2px solid #CBD5E1;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.box.on{background:#16A34A;border-color:#16A34A;color:#fff}
+.photo{border:2px dashed #CBD5E1;border-radius:14px;padding:16px;text-align:center;color:var(--mute);cursor:pointer;background:#F8FAFC}
+.photo.on{border:2px solid #16A34A;background:#F0FDF4;color:#166534}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:10}
+nav button{flex:1;border:0;background:none;padding:8px 2px 10px;font:inherit;font-size:12.5px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:1px;position:relative}
+nav .i{font-size:23px;line-height:1.1}
+nav button.on{color:var(--navy);font-weight:700}
+nav button.mid .i{background:var(--orange);color:#fff;width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-top:-18px;box-shadow:0 4px 10px rgba(249,115,22,.4)}
+.badge{position:absolute;top:4px;right:calc(50% - 22px);background:#DC2626;color:#fff;font-size:11px;border-radius:99px;padding:0 6px;font-weight:700}
+#sheet{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:20;display:none;justify-content:center;align-items:flex-end}
+#sheet.show{display:flex}
+#sheet>.in{background:var(--bg);width:100%;max-width:480px;max-height:94vh;overflow:auto;border-radius:22px 22px 0 0;padding-bottom:24px}
+.sh-h{position:sticky;top:0;background:var(--navy);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.sh-h b{font-size:18px}.x{background:rgba(255,255,255,.2);border:0;color:#fff;font-size:20px;width:38px;height:38px;border-radius:12px}
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:#0F172A;color:#fff;padding:12px 16px;border-radius:14px;font-size:15px;z-index:40;width:max-content;max-width:92%;opacity:0;pointer-events:none;transition:.25s}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* LINE */
+.lwrap{margin:12px;border-radius:18px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,.15)}
+.lhead{background:#06C755;color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.lav{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
+.lbody{background:#8CABD9;padding:12px 10px;min-height:300px;display:flex;flex-direction:column;gap:10px}
+.bub{background:#fff;border-radius:16px;padding:10px 12px;max-width:86%;font-size:15.5px;align-self:flex-start}
+.bub.me{background:#B9F5A3;align-self:flex-end}
+.bt{font-size:11px;color:#E2E8F0;align-self:flex-start;margin-top:-6px}
+.lcard{background:#fff;border-radius:16px;overflow:hidden;max-width:90%;align-self:flex-start;width:100%}
+.lc-h{color:#fff;padding:9px 12px;font-weight:600}
+.lc-b{padding:10px 12px;font-size:15px}
+.lc-b .tot{font-size:18px}
+.pimg{height:120px;border-radius:10px;background:linear-gradient(135deg,#334155,#64748B);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;margin:8px 0;text-align:center;padding:8px}
+.bar{height:12px;border-radius:99px;background:linear-gradient(90deg,#1E3A8A,#0EA5E9)}
+.mute{color:var(--mute)}.small{font-size:13.5px}
+.cta{background:linear-gradient(135deg,#1E3A8A,#0EA5E9);color:#fff;border-radius:16px;padding:16px;margin:16px 12px;text-align:center}
+.cta p{margin:0 0 10px}
+.foot{text-align:center;font-size:13px;color:var(--mute);padding:6px 0 10px}
+.urow{padding:8px 0;border-bottom:1px solid #F1F5F9;font-size:15.5px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="hb">
+      <div><div class="brand">❄️ เพื่อนช่างแอร์ <small>by JOE</small></div><div class="shop">แอร์เย็นใจ เซอร์วิส · ช่างเอก</div></div>
+      <button class="rs" onclick="resetDemo()">↺ เริ่มใหม่</button>
+    </div>
+    <h1 id="htitle"></h1>
+  </header>
+  <div class="demo">เดโมทดลองใช้ · ข้อมูลสมมติ กดเล่นได้ทุกปุ่ม</div>
+  <main id="main"></main>
+</div>
+<nav>
+  <button data-t="today" onclick="go('today')"><span class="i">📋</span>งานวันนี้</button>
+  <button data-t="remind" onclick="go('remind')"><span class="i">🔔</span>เตือนล้าง<span class="badge" id="bdg"></span></button>
+  <button data-t="new" class="mid" onclick="go('new')"><span class="i">＋</span>รับงาน</button>
+  <button data-t="line" onclick="go('line')"><span class="i">💬</span>ลูกค้า LINE</button>
+  <button data-t="money" onclick="go('money')"><span class="i">💰</span>รายได้</button>
+</nav>
+<div id="sheet" onclick="if(event.target===this)closeSheet()"><div class="in" id="sheetIn"></div></div>
+<div id="toast"></div>
+
+<script>
+const LINE_OA='https://line.me/R/ti/p/@920hqdqw';
+const TRAVEL=50;
+const TYPES=['ล้างแอร์','ซ่อม / ไม่เย็น','เติมน้ำยา','ติดตั้งใหม่'];
+const TICON={'ล้างแอร์':'🧼','ซ่อม / ไม่เย็น':'🔧','เติมน้ำยา':'🧪','ติดตั้งใหม่':'📦'};
+const CHECK={
+ 'ล้างแอร์':['ล้างคอยล์เย็น + แผ่นกรอง','ล้างคอยล์ร้อน','ล้างถาดและท่อน้ำทิ้ง','วัดแรงดันน้ำยา','ทดสอบความเย็น'],
+ 'ซ่อม / ไม่เย็น':['สอบถามอาการ / ตรวจเบื้องต้น','วัดกระแสคอมเพรสเซอร์','เช็กคาปาซิเตอร์','วัดแรงดันน้ำยา','ทดสอบความเย็น'],
+ 'เติมน้ำยา':['หาจุดรั่ว','เติมน้ำยา R32','วัดแรงดันน้ำยา','ทดสอบความเย็น'],
+ 'ติดตั้งใหม่':['ติดตั้งคอยล์เย็น','ติดตั้งคอยล์ร้อน','เดินท่อ + สายไฟ','แวคคั่มระบบ','ทดสอบความเย็น']
+};
+const EXTRAS=[
+ {n:'เปลี่ยนคาปาซิเตอร์คอมเพรสเซอร์',p:450,c:150,why:'คาปาซิเตอร์บวม คอมเพรสเซอร์ออกตัวไม่ได้ แอร์เลยไม่เย็น'},
+ {n:'เติมน้ำยา R32',p:600,c:250,why:'แรงดันน้ำยาต่ำ ความเย็นน้อยกว่าปกติ'},
+ {n:'เปลี่ยนมอเตอร์พัดลมคอยล์ร้อน',p:1200,c:600,why:'มอเตอร์พัดลมหมุนช้า มีเสียงดัง'},
+ {n:'ล้างแบบถอดตัวเครื่อง',p:400,c:20,why:'ตัวเครื่องสกปรกมาก มีเมือกดำในโพรงพัดลม'}
+];
+const ST={'นัดแล้ว':['#E0E7FF','#3730A3','📅'],'กำลังไป':['#E0F2FE','#0369A1','🚐'],'กำลังทำ':['#FEF9C3','#854D0E','🔧'],'รออนุมัติ':['#FEE2E2','#B91C1C','⏳'],'เสร็จ':['#DCFCE7','#166534','✅']};
+const TITLES={today:'งานวันนี้',new:'รับงานใหม่',line:'หน้าจอลูกค้าใน LINE',remind:'เตือนลูกค้าล้างแอร์',money:'รายได้และกำไร'};
+const SLOTS=['09:00','11:00','13:30','16:00','18:00'];
+
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const T0=new Date();T0.setHours(0,0,0,0);
+const day=n=>{const d=new Date(T0);d.setDate(d.getDate()+n);return iso(d)};
+const parse=s=>{const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])};
+const daysAgo=s=>Math.round((T0-parse(s))/864e5);
+const addMonths=(s,m)=>{const d=parse(s);d.setMonth(d.getMonth()+m);return iso(d)};
+const thd=s=>parse(s).toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
+const baht=n=>'฿'+Math.round(n).toLocaleString('th-TH');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sum=(a,k)=>a.reduce((x,i)=>x+i[k],0);
+const nowT=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())};
+const K=n=>(n/1000)+'K';
+
+let S;
+const cust=id=>S.cust.find(c=>c.id===id);
+const job=id=>S.jobs.find(j=>j.id===id);
+const unit=id=>{for(const c of S.cust){const u=c.units.find(u=>u.id===id);if(u)return u}return null};
+const jobName=j=>j.cust?cust(j.cust).name:j.name;
+
+function itemsFor(type,us){
+ if(type==='ล้างแอร์')return us.map(u=>u.btu<=13000?{n:`ล้างแอร์ ${u.room} (${K(u.btu)})`,p:500,c:60}:{n:`ล้างแอร์ ${u.room} (${K(u.btu)})`,p:700,c:80});
+ if(type==='เติมน้ำยา')return us.map(u=>({n:`เติมน้ำยา R32 ${u.room}`,p:600,c:250}));
+ if(type==='ติดตั้งใหม่')return us.map(u=>({n:`ติดตั้ง ${K(u.btu)} + ท่อ 4 ม. (${u.room})`,p:u.btu<=13000?2500:3000,c:900}));
+ return [{n:'ค่าตรวจเช็กอาการ',p:300,c:0}];
+}
+function mk(o){
+ const j=Object.assign({status:'นัดแล้ว',paid:null,extra:null,photos:{before:0,after:0},units:[]},o);
+ j.items=o.items||itemsFor(j.type,j.units.map(unit).filter(Boolean));
+ j.checks=o.checks||CHECK[j.type].map(()=>0);
+ j.log=(o.log||['book']).map(t=>typeof t==='string'?{t,at:''}:t);
+ S.jobs.push(j);return j;
+}
+function seed(){
+ S={v:1,day:day(0),seq:100,tab:'today',lineJob:null,reminded:{},period:'30',form:null,cust:[
+ {id:'c1',name:'คุณสมศรี ใจดี',phone:'0812345678',addr:'99/12 หมู่บ้านพฤกษาวิลล์ ซ.3',units:[
+  {id:'u1',room:'ห้องนอนใหญ่',brand:'Daikin',btu:12000,last:day(-196)},
+  {id:'u2',room:'ห้องนั่งเล่น',brand:'Mitsubishi',btu:18000,last:day(-196)}]},
+ {id:'c2',name:'ร้านกาแฟบ้านสวน',phone:'0899998888',addr:'45 ถ.เทศบาล 2 ข้างตลาดสด',units:[
+  {id:'u3',room:'หน้าร้าน',brand:'Carrier',btu:24000,last:day(-92)},
+  {id:'u4',room:'ห้องเก็บของ',brand:'Haier',btu:9000,last:day(-92)}]},
+ {id:'c3',name:'คุณวิชัย รักบ้าน',phone:'0861112222',addr:'12/3 ม.5 บ้านหนองบัว',units:[
+  {id:'u5',room:'ห้องนอน',brand:'Samsung',btu:9000,last:day(-165)}]},
+ {id:'c4',name:'คลินิกทันตกรรมยิ้มสวย',phone:'0873334444',addr:'88 ถ.ศรีสุริยวงศ์',units:[
+  {id:'u6',room:'ห้องทำฟัน 1',brand:'Daikin',btu:12000,last:day(-188)},
+  {id:'u7',room:'ห้องทำฟัน 2',brand:'Daikin',btu:12000,last:day(-188)},
+  {id:'u8',room:'ห้องรอตรวจ',brand:'Mitsubishi',btu:24000,last:day(-188)}]},
+ {id:'c5',name:'คุณมาลี ศรีสุข',phone:'0925556666',addr:'7 ซ.ร่มเย็น',units:[
+  {id:'u9',room:'ห้องนอน',brand:'LG',btu:12000,last:day(0)}]},
+ {id:'c6',name:'หอพักบ้านสุขใจ',phone:'0947778888',addr:'150 ถ.เลี่ยงเมือง',units:[
+  {id:'u10',room:'ห้อง 101',brand:'Central Air',btu:12000,last:day(-410)},
+  {id:'u11',room:'ห้อง 102',brand:'Central Air',btu:12000,last:day(-410)}]},
+ {id:'c7',name:'คุณประยูร มั่นคง',phone:'0981234567',addr:'210 ม.2 บ้านโนนสูง',units:[
+  {id:'u12',room:'ห้องนอน',brand:'Sharp',btu:12000,last:day(-60)}]}
+ ],jobs:[]};
+ mk({id:'j1',cust:'c5',date:day(0),time:'09:00',type:'ล้างแอร์',units:['u9'],status:'เสร็จ',paid:'โอน',log:['book','go','start','done'],checks:[1,1,1,1,1],photos:{before:1,after:1}});
+ mk({id:'j2',cust:'c1',date:day(0),time:'11:00',type:'ล้างแอร์',units:['u1','u2'],status:'กำลังไป',log:['book','go']});
+ mk({id:'j3',cust:'c3',date:day(0),time:'13:30',type:'ซ่อม / ไม่เย็น',units:['u5'],log:['book']});
+ mk({id:'j4',cust:'c2',date:day(0),time:'16:00',type:'ล้างแอร์',units:['u3','u4'],log:['book']});
+ mk({id:'j5',cust:'c7',date:day(1),time:'09:00',type:'เติมน้ำยา',units:['u12'],log:['book']});
+ const c5=[500,60],c7=[700,80],r=[600,250],ins=[2500,900];
+ const P=[
+  [1,'คุณอรุณี','ล้างแอร์',[['ล้างแอร์ 12K',...c5],['ล้างแอร์ 12K',...c5]]],
+  [1,'ร้านตัดผมเท่ห์','เติมน้ำยา',[['เติมน้ำยา R32',...r]]],
+  [2,'คุณสมชาย','ติดตั้งใหม่',[['ติดตั้ง 12K + ท่อ 4 ม.',...ins]]],
+  [3,'โรงเรียนอนุบาลดวงดาว','ล้างแอร์',[1,2,3,4].map(()=>['ล้างแอร์ 12K',...c5])],
+  [4,'คุณนิด','ซ่อม / ไม่เย็น',[['ค่าตรวจเช็กอาการ',300,0],['เปลี่ยนคาปาซิเตอร์คอมเพรสเซอร์',450,150]]],
+  [6,'คุณแดง','ล้างแอร์',[['ล้างแอร์ 18K',...c7]]],
+  [8,'ร้านส้มตำแซ่บ','ล้างแอร์',[['ล้างแอร์ 18K',...c7],['ล้างแอร์ 12K',...c5]]],
+  [9,'คุณบุญมี','เติมน้ำยา',[['เติมน้ำยา R32',...r]]],
+  [12,'สำนักงานบัญชีเอ','ล้างแอร์',[1,2,3].map(()=>['ล้างแอร์ 18K',...c7])],
+  [15,'คุณจิตรา','ติดตั้งใหม่',[['ติดตั้ง 12K + ท่อ 4 ม.',...ins],['ท่อเพิ่ม 2 ม.',600,250]]],
+  [18,'คุณเอ','ล้างแอร์',[['ล้างแอร์ 12K',...c5]]],
+  [21,'มินิมาร์ทใกล้บ้าน','ซ่อม / ไม่เย็น',[['ค่าตรวจเช็กอาการ',300,0],['เปลี่ยนมอเตอร์พัดลมคอยล์ร้อน',1200,600]]],
+  [25,'คุณสุดา','ล้างแอร์',[['ล้างแอร์ 12K',...c5],['ล้างแอร์ 12K',...c5]]],
+  [28,'คุณธนา','ล้างแอร์',[['ล้างแอร์ 18K',...c7]]]
+ ];
+ P.forEach((p,i)=>mk({id:'p'+i,name:p[1],date:day(-p[0]),time:'10:00',type:p[2],status:'เสร็จ',paid:'โอน',items:p[3].map(x=>({n:x[0],p:x[1],c:x[2]})),log:['book','go','start','done']}));
+}
+function save(){try{localStorage.setItem('joe-air-v1',JSON.stringify(S))}catch(e){}}
+function load(){
+ try{const s=JSON.parse(localStorage.getItem('joe-air-v1')||'null');if(s&&s.v===1&&s.day===day(0)){S=s;return}}catch(e){}
+ seed();
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),3600)}
+function go(t){S.tab=t;closeSheet(true);render();scrollTo(0,0)}
+function resetDemo(){seed();closeSheet(true);render();toast('เริ่มเดโมใหม่แล้ว')}
+
+function dueInfo(){
+ const rows=S.cust.map(c=>{const us=c.units.filter(u=>u.last).map(u=>Object.assign({},u,{d:daysAgo(u.last)}));
+  return {c,us,due:us.filter(u=>u.d>=180),soon:us.filter(u=>u.d>=150&&u.d<180)}});
+ return rows;
+}
+function upcomingFor(cid){return S.jobs.find(j=>j.cust===cid&&j.status!=='เสร็จ')}
+
+function render(){
+ const v={today:vToday,new:vNew,line:vLine,remind:vRemind,money:vMoney}[S.tab]();
+ document.getElementById('main').innerHTML=v;
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.tab));
+ document.getElementById('htitle').textContent=TITLES[S.tab];
+ const n=dueInfo().filter(r=>r.due.length&&!S.reminded[r.c.id]&&!upcomingFor(r.c.id)).length;
+ const b=document.getElementById('bdg');b.textContent=n;b.style.display=n?'':'none';
+ save();
+}
+
+/* ---------- วันนี้ ---------- */
+function vToday(){
+ const js=S.jobs.filter(j=>j.date===day(0)&&j.cust).sort((a,b)=>a.time.localeCompare(b.time));
+ const done=js.filter(j=>j.status==='เสร็จ');
+ const inc=done.reduce((a,j)=>a+sum(j.items,'p'),0);
+ const up=S.jobs.filter(j=>j.date>day(0)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+ let h=`<div class="tiles"><div class="tile"><b>${js.length}</b><span>งานวันนี้</span></div><div class="tile"><b>${done.length}</b><span>เสร็จแล้ว</span></div><div class="tile"><b style="font-size:19px">${baht(inc)}</b><span>รับเงินแล้ว</span></div></div>`;
+ h+=`<div class="sec">${thd(day(0))}</div>`;
+ h+=js.map(jobCard).join('')||'<div class="card mute">วันนี้ยังไม่มีงาน กด ＋ รับงาน ได้เลย</div>';
+ if(up.length){h+=`<div class="sec">นัดถัดไป</div><div class="card">`+up.map(j=>`<div class="urow"><b>${thd(j.date)} ${j.time}</b> · ${esc(jobName(j))}<div class="small mute">${TICON[j.type]} ${j.type} · ${j.units.length} เครื่อง</div></div>`).join('')+`</div>`}
+ return h;
+}
+function jobCard(j){
+ const c=cust(j.cust),st=ST[j.status],tot=sum(j.items,'p');
+ const map='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(c.addr);
+ const B={
+  'นัดแล้ว':`<button class="btn o" onclick="act('${j.id}','go')">🚐 ออกเดินทาง</button>`,
+  'กำลังไป':`<button class="btn o" onclick="act('${j.id}','start')">🔧 ถึงแล้ว เริ่มงาน</button>`,
+  'กำลังทำ':`<button class="btn n" onclick="openJob('${j.id}')">📋 เปิดใบงาน</button>`,
+  'รออนุมัติ':`<button class="btn r" onclick="openJob('${j.id}')">⏳ รอลูกค้าอนุมัติ</button>`,
+  'เสร็จ':`<button class="btn g" onclick="openBill('${j.id}')">🧾 ดูบิล</button>`}[j.status];
+ return `<div class="card"><div class="row"><div class="time">${j.time}</div><span class="chip" style="background:${st[0]};color:${st[1]}">${st[2]} ${j.status}</span></div>
+ <div class="nm">${esc(c.name)}</div><div class="sub">📍 ${esc(c.addr)}</div>
+ <div class="sub">${TICON[j.type]} ${j.type} · ${j.units.length} เครื่อง · <b style="color:var(--ink)">${baht(tot)}</b></div>
+ <div class="acts"><a class="btn g" href="${map}" target="_blank" rel="noopener">📍</a><a class="btn g" href="tel:${c.phone}">📞</a>${B}</div></div>`;
+}
+function act(id,a){
+ const j=job(id);S.lineJob=id;
+ if(a==='go'){j.status='กำลังไป';j.log.push({t:'go',at:nowT()});render();toast('ส่ง LINE ให้ลูกค้าแล้ว: “ช่างกำลังเดินทาง ถึงประมาณ 20–30 นาที”')}
+ if(a==='start'){j.status='กำลังทำ';j.log.push({t:'start',at:nowT()});render();openJob(id)}
+}
+
+/* ---------- ใบงาน ---------- */
+let SH=null;
+function openJob(id){SH={k:'job',id};drawSheet()}
+function openBill(id){SH={k:'bill',id};drawSheet()}
+function closeSheet(silent){SH=null;document.getElementById('sheet').classList.remove('show');if(!silent)render()}
+function drawSheet(){
+ const el=document.getElementById('sheet'),inn=document.getElementById('sheetIn');
+ if(!SH){el.classList.remove('show');return}
+ inn.innerHTML=SH.k==='job'?sJob(job(SH.id)):sBill(job(SH.id));
+ el.classList.add('show');
+}
+function sJob(j){
+ const c=cust(j.cust),ck=CHECK[j.type],nd=j.checks.filter(Boolean).length,wait=j.status==='รออนุมัติ';
+ let h=`<div class="sh-h"><b>📋 ใบงาน ${j.time} น.</b><button class="x" onclick="closeSheet()">✕</button></div>`;
+ h+=`<div class="card"><div class="nm" style="margin:0">${esc(c.name)}</div><div class="sub">${TICON[j.type]} ${j.type} · 📞 ${c.phone}</div>`+
+  j.units.map(unit).map(u=>`<div class="urow">❄️ <b>${esc(u.room)}</b> · ${u.brand} ${K(u.btu)} BTU</div>`).join('')+`</div>`;
+ h+=`<div class="sec">1. ถ่ายรูปก่อนทำ</div><div class="card"><div class="photo ${j.photos.before?'on':''}" onclick="photo('before')">${j.photos.before?'✅ ถ่ายแล้ว · ส่งเข้า LINE ลูกค้าแล้ว':'📷 แตะเพื่อถ่ายรูปก่อนทำ'}</div></div>`;
+ h+=`<div class="sec">2. เช็กลิสต์งาน (${nd}/${ck.length})</div><div class="card" style="padding:6px 14px">`+
+  ck.map((t,i)=>`<div class="chk" onclick="tick(${i})"><div class="box ${j.checks[i]?'on':''}">${j.checks[i]?'✓':''}</div>${t}</div>`).join('')+`</div>`;
+ h+=`<div class="sec">3. เจอปัญหาเพิ่ม? ส่งให้ลูกค้าอนุมัติ</div><div class="card">`;
+ if(wait){const x=j.extra;h+=`<div style="color:#B91C1C;font-weight:600">⏳ รอลูกค้ากดอนุมัติใน LINE</div><div class="it"><span>${esc(x.n)}</span><b>${baht(x.p)}</b></div>
+  <button class="btn l block" style="margin-top:10px" onclick="go('line')">💬 เปิดหน้าลูกค้า LINE (ลองกดอนุมัติ)</button>`}
+ else h+=`<div class="pick">`+EXTRAS.map((x,i)=>`<button onclick="askExtra(${i})">＋ ${x.n}<small>${baht(x.p)}</small></button>`).join('')+`</div><div class="hint">แตะแล้วระบบส่งรูป + ราคาให้ลูกค้ากดอนุมัติเอง ไม่ต้องโทรอธิบาย</div>`;
+ h+=`</div>`;
+ h+=`<div class="sec">4. ถ่ายรูปหลังทำ</div><div class="card"><div class="photo ${j.photos.after?'on':''}" onclick="photo('after')">${j.photos.after?'✅ ถ่ายแล้ว · ส่งเข้า LINE ลูกค้าแล้ว':'📷 แตะเพื่อถ่ายรูปหลังทำ'}</div></div>`;
+ h+=`<div class="sec">รายการค่าบริการ</div><div class="card">`+j.items.map(i=>`<div class="it"><span>${esc(i.n)}</span><span>${baht(i.p)}</span></div>`).join('')+`<div class="tot"><span>รวม</span><span>${baht(sum(j.items,'p'))}</span></div></div>`;
+ h+=`<div style="margin:12px">${nd<ck.length&&!wait?'<div class="hint" style="text-align:center;margin-bottom:6px">ยังติ๊กเช็กลิสต์ไม่ครบ ก็ปิดงานได้ (เดโม)</div>':''}<button class="btn o block big" ${wait?'disabled':''} onclick="openBill('${j.id}')">✅ ปิดงาน ออกบิล</button></div>`;
+ return h;
+}
+function photo(k){const j=job(SH.id);j.photos[k]=1;drawSheet();save();toast(k==='before'?'ส่งรูปก่อนทำเข้า LINE ลูกค้าแล้ว':'ส่งรูปหลังทำเข้า LINE ลูกค้าแล้ว')}
+function tick(i){const j=job(SH.id);j.checks[i]=j.checks[i]?0:1;drawSheet();save()}
+function askExtra(i){const j=job(SH.id),x=Object.assign({},EXTRAS[i]);j.extra=x;j.status='รออนุมัติ';j.log.push({t:'extra',at:nowT(),x,r:null});S.lineJob=j.id;drawSheet();render();toast('ส่งรูป + ราคาให้ลูกค้ากดอนุมัติใน LINE แล้ว')}
+function qr(){let s='',r=7;for(let y=0;y<25;y++)for(let x=0;x<25;x++){r=(r*9301+49297)%233280;const f=(x<7&&y<7)||(x>17&&y<7)||(x<7&&y>17);const on=f?((x%6===0||y%6===0||(x%24===0)||(y%24===0)||(x>1&&x<5&&((y>1&&y<5)||(y>19&&y<23)))||(x>19&&x<23&&y>1&&y<5))):r/233280>.5;if(on)s+=`<rect x="${x}" y="${y}" width="1" height="1"/>`}
+ return `<svg viewBox="-1 -1 27 27" width="150" height="150" style="background:#fff">${s}</svg>`}
+function sBill(j){
+ const c=cust(j.cust),tot=sum(j.items,'p');
+ let h=`<div class="sh-h"><b>🧾 ใบเสร็จ / ใบรับประกัน</b><button class="x" onclick="closeSheet()">✕</button></div>`;
+ h+=`<div class="card"><div style="text-align:center"><b style="font-size:18px">แอร์เย็นใจ เซอร์วิส</b><div class="small mute">ช่างเอก · ${thd(j.date)}</div></div>
+ <div style="margin-top:10px"><b>${esc(c.name)}</b><div class="small mute">${esc(c.addr)}</div></div><div style="margin-top:8px">`+
+ j.items.map(i=>`<div class="it"><span>${esc(i.n)}</span><span>${baht(i.p)}</span></div>`).join('')+`</div><div class="tot"><span>ยอดชำระ</span><span>${baht(tot)}</span></div>
+ <div class="small mute" style="margin-top:8px">🛡️ รับประกันงาน 30 วัน · เตือนล้างครั้งถัดไป ${thd(addMonths(j.paid?j.date:day(0),6))}</div></div>`;
+ if(j.paid){h+=`<div class="card" style="text-align:center;color:#166534;font-weight:600">✅ ชำระแล้ว (${j.paid}) · ส่งใบเสร็จเข้า LINE ลูกค้าแล้ว</div><div style="margin:12px"><button class="btn g block" onclick="closeSheet()">ปิด</button></div>`}
+ else h+=`<div class="card" style="text-align:center"><div style="font-weight:600;margin-bottom:6px">ให้ลูกค้าสแกนจ่าย</div>${qr()}<div class="small mute">QR พร้อมเพย์ (ตัวอย่าง ใช้จ่ายจริงไม่ได้)</div></div>
+ <div style="margin:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn n big" onclick="pay('เงินสด')">💵 รับเงินสด</button><button class="btn o big" onclick="pay('โอน')">📲 รับโอนแล้ว</button></div>`;
+ return h;
+}
+function pay(m){
+ const j=job(SH.id);j.paid=m;j.status='เสร็จ';j.log.push({t:'done',at:nowT()});S.lineJob=j.id;
+ if(j.type==='ล้างแอร์'||j.type==='ติดตั้งใหม่')j.units.forEach(id=>{const u=unit(id);if(u)u.last=day(0)});
+ closeSheet();toast('ส่งใบเสร็จ + รับประกัน 30 วันเข้า LINE แล้ว · ตั้งเตือนล้างรอบหน้า '+thd(addMonths(day(0),6)));
+}
+
+/* ---------- รับงาน ---------- */
+function newForm(){return {phone:'',cust:null,newName:'',newAddr:'',units:[],newUnits:[],type:'ล้างแอร์',date:day(0),time:null,nr:'ห้องนอน',nb:12000,nbr:'Daikin'}}
+function vNew(){
+ const f=S.form||(S.form=newForm());
+ return `<div class="card"><label class="lb">1. เบอร์โทรลูกค้า</label><input id="ph" inputmode="tel" maxlength="10" placeholder="เช่น 0812345678" value="${esc(f.phone)}" oninput="onPhone(this.value)"><div class="hint">ลองพิมพ์ <b>0812345678</b> ระบบจะดึงลูกค้าเก่ามาให้</div></div><div id="njb">${njBody()}</div>`;
+}
+function onPhone(v){
+ const f=S.form;f.phone=v.replace(/\D/g,'');
+ const c=S.cust.find(c=>c.phone===f.phone);
+ if(c&&f.cust!==c.id){f.cust=c.id;f.units=c.units.map(u=>u.id)}
+ else if(!c&&f.cust){f.cust=null;f.units=[]}
+ document.getElementById('njb').innerHTML=njBody();
+}
+function rnj(){document.getElementById('njb').innerHTML=njBody();save()}
+function fset(k,v){S.form[k]=v;rnj()}
+function togU(id){const f=S.form,i=f.units.indexOf(id);i<0?f.units.push(id):f.units.splice(i,1);rnj()}
+function addNU(){const f=S.form;f.newUnits.push({room:f.nr,btu:+f.nb,brand:f.nbr});rnj()}
+function delNU(i){S.form.newUnits.splice(i,1);rnj()}
+function curUnits(){const f=S.form;return f.cust?f.units.map(unit).filter(Boolean):f.newUnits}
+function njBody(){
+ const f=S.form;let h='';
+ if(f.cust){const c=cust(f.cust);
+  h+=`<div class="card" style="border:2px solid #16A34A"><div style="color:#166534;font-weight:600">✅ ลูกค้าเก่า · ดึงประวัติให้แล้ว</div><div class="nm">${esc(c.name)}</div><div class="sub">📍 ${esc(c.addr)}</div></div>`;
+  h+=`<div class="card"><label class="lb">2. เลือกเครื่องที่จะทำ</label><div class="pick">`+c.units.map(u=>`<button class="${f.units.includes(u.id)?'on':''}" onclick="togU('${u.id}')">❄️ ${esc(u.room)} ${K(u.btu)}<small>${u.brand} · ${u.last?(daysAgo(u.last)?'ล้างล่าสุด '+Math.floor(daysAgo(u.last)/30)+' เดือนก่อน':'ล้างวันนี้'):'ยังไม่มีประวัติ'}</small></button>`).join('')+`</div></div>`;
+ } else if(f.phone.length>=9){
+  h+=`<div class="card"><div style="color:var(--sky);font-weight:600;margin-bottom:8px">🆕 ลูกค้าใหม่</div>
+  <input placeholder="ชื่อลูกค้า / ร้าน" value="${esc(f.newName)}" oninput="S.form.newName=this.value" style="margin-bottom:8px">
+  <input placeholder="ที่อยู่ (ใช้นำทาง)" value="${esc(f.newAddr)}" oninput="S.form.newAddr=this.value"></div>`;
+  h+=`<div class="card"><label class="lb">2. เครื่องแอร์ของลูกค้า</label>`+f.newUnits.map((u,i)=>`<div class="urow row"><span>❄️ ${esc(u.room)} · ${u.brand} ${K(u.btu)}</span><button class="btn g" style="padding:6px 10px" onclick="delNU(${i})">ลบ</button></div>`).join('')+
+  `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+  <select onchange="S.form.nr=this.value">${['ห้องนอน','ห้องนอน 2','ห้องนั่งเล่น','ห้องทำงาน','หน้าร้าน','ห้องประชุม'].map(x=>`<option ${x===f.nr?'selected':''}>${x}</option>`).join('')}</select>
+  <select onchange="S.form.nb=this.value">${[9000,12000,18000,24000,30000].map(x=>`<option value="${x}" ${x==f.nb?'selected':''}>${K(x)}</option>`).join('')}</select>
+  <select onchange="S.form.nbr=this.value">${['Daikin','Mitsubishi','Carrier','Samsung','LG','Haier','Sharp','อื่นๆ'].map(x=>`<option ${x===f.nbr?'selected':''}>${x}</option>`).join('')}</select></div>
+  <button class="btn g block" style="margin-top:8px" onclick="addNU()">＋ เพิ่มเครื่อง</button></div>`;
+ } else return `<div class="card mute">พิมพ์เบอร์ให้ครบ ระบบจะค้นหาลูกค้าให้อัตโนมัติ</div>`;
+ const us=curUnits(),taken=S.jobs.filter(j=>j.date===f.date).map(j=>j.time);
+ h+=`<div class="card"><label class="lb">3. ประเภทงาน</label><div class="pick">`+TYPES.map(t=>`<button class="${f.type===t?'on':''}" onclick="fset('type','${t}')">${TICON[t]} ${t}</button>`).join('')+`</div></div>`;
+ h+=`<div class="card"><label class="lb">4. วันและเวลานัด</label><div class="pick">`+[0,1,2,3].map(n=>`<button class="${f.date===day(n)?'on':''}" onclick="S.form.time=null;fset('date','${day(n)}')">${n===0?'วันนี้':n===1?'พรุ่งนี้':thd(day(n))}</button>`).join('')+`</div>
+ <div class="pick" style="margin-top:10px">`+SLOTS.map(s=>`<button class="${f.time===s?'on':''}" ${taken.includes(s)?'disabled':''} onclick="fset('time','${s}')">${s}</button>`).join('')+`</div><div class="hint">เวลาที่ขีดฆ่า = มีนัดแล้ว ระบบกันนัดชนให้</div></div>`;
+ const it=us.length?itemsFor(f.type,us):[];
+ h+=`<div class="card"><label class="lb">ราคาประมาณ</label>`+(it.length?it.map(i=>`<div class="it"><span>${esc(i.n)}</span><span>${baht(i.p)}</span></div>`).join('')+`<div class="tot"><span>รวม</span><span>${baht(sum(it,'p'))}</span></div>`:'<div class="mute">เลือกเครื่องก่อน</div>')+`</div>`;
+ h+=`<div style="margin:12px"><button class="btn o block big" onclick="saveJob()">💾 บันทึกนัด + ส่งยืนยันเข้า LINE</button></div>`;
+ return h;
+}
+function saveJob(){
+ const f=S.form;let cid=f.cust,uids=f.units.slice();
+ if(!cid){
+  if(!f.newName.trim())return toast('ใส่ชื่อลูกค้าก่อนครับ');
+  if(!f.newUnits.length)return toast('เพิ่มเครื่องแอร์อย่างน้อย 1 เครื่อง');
+  cid='c'+(++S.seq);const units=f.newUnits.map(u=>Object.assign({id:'u'+(++S.seq),last:null},u));
+  S.cust.push({id:cid,name:f.newName.trim(),phone:f.phone,addr:f.newAddr.trim()||'-',units});uids=units.map(u=>u.id);
+ }
+ if(!uids.length)return toast('เลือกเครื่องที่จะทำก่อนครับ');
+ if(!f.time)return toast('เลือกเวลานัดก่อนครับ');
+ const j=mk({id:'j'+(++S.seq),cust:cid,date:f.date,time:f.time,type:f.type,units:uids,log:[{t:'book',at:nowT()}]});
+ S.lineJob=j.id;S.form=null;S.tab='today';render();scrollTo(0,0);
+ toast('บันทึกนัดแล้ว · ส่งข้อความยืนยันเข้า LINE ลูกค้าแล้ว (ดูที่แท็บ ลูกค้า LINE)');
+}
+
+/* ---------- ลูกค้า LINE ---------- */
+function vLine(){
+ const opts=S.jobs.filter(j=>j.cust&&j.date>=day(0)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+ if(!opts.length)return '<div class="card mute">ยังไม่มีนัด</div>';
+ let j=job(S.lineJob);if(!j||!opts.includes(j))j=opts.find(o=>o.status!=='เสร็จ'&&o.status!=='นัดแล้ว')||opts[0];
+ const c=cust(j.cust),us=j.units.map(unit),tot=sum(j.items,'p');
+ let h=`<div class="card" style="padding:10px 14px"><label class="small mute">ดูมุมมองของลูกค้าคนไหน</label><select onchange="S.lineJob=this.value;render()">`+
+  opts.map(o=>`<option value="${o.id}" ${o===j?'selected':''}>${o.date===day(0)?'วันนี้':thd(o.date)} ${o.time} · ${esc(cust(o.cust).name)} (${o.status})</option>`).join('')+`</select></div>`;
+ h+=`<div class="lwrap"><div class="lhead"><div class="lav">❄️</div><div><b>แอร์เย็นใจ เซอร์วิส</b><div class="small" style="opacity:.9">บัญชีทางการ · คุยกับ ${esc(c.name)}</div></div></div><div class="lbody">`;
+ j.log.forEach(e=>{
+  if(e.t==='book')h+=`<div class="lcard"><div class="lc-h" style="background:#1E3A8A">✅ ยืนยันนัดหมาย</div><div class="lc-b">
+   <div>📅 ${thd(j.date)} เวลา ${j.time} น.</div><div>${TICON[j.type]} ${j.type}</div><div>❄️ ${us.map(u=>esc(u.room)+' '+K(u.btu)).join(', ')}</div>
+   <div class="small mute">📍 ${esc(c.addr)}</div><div class="tot"><span>ราคาประมาณ</span><span>${baht(sum(itemsFor(j.type,us),'p'))}</span></div>
+   <div class="small mute">ช่างเอก · ถ้าต้องการเลื่อนนัด ตอบแชตนี้ได้เลย</div></div></div>`;
+  if(e.t==='go')h+=`<div class="bub">🚐 ช่างเอกกำลังเดินทางไปหาคุณ<br>ถึงประมาณ 20–30 นาทีครับ</div>`;
+  if(e.t==='start')h+=`<div class="bub">🔧 ช่างถึงแล้ว เริ่มงานครับ${j.photos.before?'<div class="pimg">📷 รูปก่อนทำ<br>(แผ่นกรอง/คอยล์ก่อนล้าง)</div>':''}</div>`;
+  if(e.t==='extra'){
+   h+=`<div class="lcard" style="border:2px solid #F97316"><div class="lc-h" style="background:#F97316">⚠️ ช่างพบปัญหาเพิ่ม</div><div class="lc-b"><div class="pimg">📷 รูปจุดที่พบปัญหา</div>
+    <div>${esc(e.x.why)}</div><div class="tot"><span>${esc(e.x.n)}</span><span>${baht(e.x.p)}</span></div>`;
+   if(e.r==null)h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn g" onclick="answer('${j.id}',0)">ไม่ทำ</button><button class="btn l" onclick="answer('${j.id}',1)">อนุมัติ</button></div>`;
+   h+=`</div></div>`;
+   if(e.r!=null)h+=`<div class="bub me">${e.r?'อนุมัติครับ ทำได้เลย 👍':'ยังไม่ทำรายการนี้ครับ'}</div>`;
+  }
+  if(e.t==='done')h+=`${j.photos.after?'<div class="bub">✨ งานเสร็จแล้วครับ<div class="pimg">📷 รูปหลังทำ<br>(สะอาด เย็นฉ่ำ)</div></div>':''}<div class="lcard"><div class="lc-h" style="background:#16A34A">🧾 ใบเสร็จ · ชำระแล้ว</div><div class="lc-b">`+
+   j.items.map(i=>`<div class="it"><span>${esc(i.n)}</span><span>${baht(i.p)}</span></div>`).join('')+`<div class="tot"><span>รวม</span><span>${baht(tot)}</span></div>
+   <div class="small" style="margin-top:6px">🛡️ รับประกันงาน 30 วัน<br>🔔 เราจะเตือนล้างแอร์ครั้งถัดไป ${thd(addMonths(j.date,6))}</div></div></div>`;
+ });
+ const pending=j.log.some(e=>e.t==='extra'&&e.r==null);
+ h+=`</div></div>`;
+ h+=`<div class="hint" style="margin:0 16px">${pending?'👆 ลองกด <b>อนุมัติ</b> แล้วกลับไปดูใบงานช่าง ราคาจะอัปเดตทันที':j.status==='เสร็จ'?'ลูกค้าได้ใบเสร็จและวันเตือนล้างรอบหน้าครบในแชตเดียว':'ข้อความในหน้านี้จะเพิ่มขึ้นเองทุกครั้งที่ช่างกดปุ่มในหน้า งานวันนี้'}</div>`;
+ h+=cta();
+ return h;
+}
+function answer(id,yes){
+ const j=job(id),e=[...j.log].reverse().find(e=>e.t==='extra'&&e.r==null);if(!e)return;
+ e.r=yes?1:0;if(yes)j.items.push({n:e.x.n,p:e.x.p,c:e.x.c});j.extra=null;j.status='กำลังทำ';render();
+ toast(yes?'ลูกค้าอนุมัติแล้ว · ใบงานช่างอัปเดตราคาให้ทันที':'ลูกค้าไม่ทำรายการนี้ · แจ้งช่างแล้ว');
+}
+function cta(){return `<div class="cta"><p><b>อยากใช้ระบบนี้กับร้านแอร์ของคุณ?</b><br><span class="small">ทดลองใช้ฟรี 30 วัน</span></p><a class="btn l block" href="${LINE_OA}" target="_blank" rel="noopener">💬 สนใจใช้ระบบนี้ ทัก LINE</a></div><div class="foot">ระบบโดย <b style="color:var(--navy)">เพื่อนช่างแอร์</b> · ในเครือ <b style="color:var(--navy)">JOE ระบบงานง่ายๆ</b></div>`}
+
+/* ---------- เตือนล้าง ---------- */
+function vRemind(){
+ const rows=dueInfo(),due=rows.filter(r=>r.due.length),soon=rows.filter(r=>!r.due.length&&r.soon.length);
+ const okN=rows.reduce((a,r)=>a+r.us.filter(u=>u.d<150).length,0);
+ const dueU=due.reduce((a,r)=>a.concat(r.due),[]),pot=sum(itemsFor('ล้างแอร์',dueU),'p');
+ const toSend=due.filter(r=>!S.reminded[r.c.id]&&!upcomingFor(r.c.id));
+ let h=`<div class="cta" style="text-align:left;margin-top:12px"><div class="small" style="opacity:.9">ถึงรอบล้างแล้ว (ครบ 6 เดือน)</div><div style="font-size:24px;font-weight:700">${due.length} ราย · ${dueU.length} เครื่อง</div><div>รายได้ที่รออยู่ ≈ <b>${baht(pot)}</b></div>
+ ${toSend.length?`<button class="btn o block" style="margin-top:10px" onclick="remindAll()">💬 ส่งเตือนทุกคนเข้า LINE (${toSend.length})</button>`:''}</div>`;
+ const ex=due[0]||soon[0];
+ if(ex)h+=`<div class="sec">ตัวอย่างข้อความที่ลูกค้าได้รับ</div><div class="lwrap"><div class="lbody" style="min-height:0"><div class="bub">สวัสดีครับ ${esc(ex.c.name)} 🙏<br>แอร์ ${ex.c.units.length} เครื่องของคุณใช้งานมาครบ 6 เดือนแล้ว ถึงเวลาล้างให้เย็นเร็ว ลมแรง และประหยัดไฟขึ้นครับ<br>ตอบแชตนี้เพื่อเลือกวันนัดได้เลย ❄️</div></div></div>`;
+ const card=(r,lv)=>{const up=upcomingFor(r.c.id),list=lv==='due'?r.due:r.soon;
+  return `<div class="card"><div class="row"><div class="nm" style="margin:0;font-size:17.5px">${esc(r.c.name)}</div><span class="chip" style="background:${lv==='due'?'#FEE2E2;color:#B91C1C':'#FEF9C3;color:#854D0E'}">${lv==='due'?'ถึงรอบแล้ว':'ใกล้ถึง'}</span></div>`+
+  list.map(u=>`<div class="sub">❄️ ${esc(u.room)} ${K(u.btu)} · ล้างล่าสุด ${Math.floor(u.d/30)} เดือนก่อน</div>`).join('')+
+  (up?`<div style="margin-top:10px;color:#166534;font-weight:600">📅 มีนัดแล้ว ${up.date===day(0)?'วันนี้':thd(up.date)} ${up.time}</div>`:
+  `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">${S.reminded[r.c.id]?'<button class="btn g" disabled>✓ ส่งเตือนแล้ว</button>':`<button class="btn l" onclick="remind('${r.c.id}')">💬 ส่งเตือน</button>`}<button class="btn n" onclick="bookFrom('${r.c.id}')">📅 นัดเลย</button></div>`)+`</div>`};
+ if(due.length)h+=`<div class="sec">🔴 ถึงรอบแล้ว</div>`+due.map(r=>card(r,'due')).join('');
+ if(soon.length)h+=`<div class="sec">🟡 ใกล้ถึงรอบ (ภายใน 1 เดือน)</div>`+soon.map(r=>card(r,'soon')).join('');
+ h+=`<div class="hint" style="margin:12px 16px">🟢 ยังไม่ถึงรอบอีก ${okN} เครื่อง · ระบบนับให้เองจากวันที่ปิดงานล้างแอร์ล่าสุด</div>`;
+ return h;
+}
+function remind(cid){S.reminded[cid]=1;render();toast('ส่งข้อความเตือนล้างแอร์เข้า LINE '+cust(cid).name+' แล้ว')}
+function remindAll(){const r=dueInfo().filter(r=>r.due.length&&!S.reminded[r.c.id]&&!upcomingFor(r.c.id));r.forEach(x=>S.reminded[x.c.id]=1);render();toast('ส่งเตือนเข้า LINE แล้ว '+r.length+' ราย')}
+function bookFrom(cid){const c=cust(cid),f=newForm();f.phone=c.phone;f.cust=cid;f.units=c.units.map(u=>u.id);S.form=f;go('new')}
+
+/* ---------- รายได้ ---------- */
+function vMoney(){
+ const n=+S.period;
+ const js=S.jobs.filter(j=>j.status==='เสร็จ'&&daysAgo(j.date)>=0&&daysAgo(j.date)<(n||1)).sort((a,b)=>b.date.localeCompare(a.date));
+ const rev=js.reduce((a,j)=>a+sum(j.items,'p'),0),parts=js.reduce((a,j)=>a+sum(j.items,'c'),0),trav=TRAVEL*js.length,prof=rev-parts-trav;
+ const by=TYPES.map(t=>({t,v:js.filter(j=>j.type===t).reduce((a,j)=>a+sum(j.items,'p'),0),n:js.filter(j=>j.type===t).length})),mx=Math.max(1,...by.map(b=>b.v));
+ let h=`<div class="card" style="padding:8px"><div class="pick" style="justify-content:center">`+[['0','วันนี้'],['7','7 วัน'],['30','30 วัน']].map(p=>`<button class="${S.period===p[0]?'on':''}" onclick="S.period='${p[0]}';render()">${p[1]}</button>`).join('')+`</div></div>`;
+ h+=`<div class="cta" style="text-align:left;margin-top:0"><div class="small" style="opacity:.9">กำไรสุทธิ</div><div style="font-size:30px;font-weight:700">${baht(prof)}</div><div class="small">${js.length} งาน · กำไร ${rev?Math.round(prof/rev*100):0}% · เฉลี่ย ${baht(js.length?prof/js.length:0)}/งาน</div></div>`;
+ h+=`<div class="card"><div class="it"><span>รายรับทั้งหมด</span><b>${baht(rev)}</b></div><div class="it"><span>หัก ค่าอะไหล่ / น้ำยา</span><span style="color:#B91C1C">−${baht(parts)}</span></div><div class="it"><span>หัก ค่าเดินทาง (฿${TRAVEL}/งาน)</span><span style="color:#B91C1C">−${baht(trav)}</span></div><div class="tot"><span>เหลือเข้ากระเป๋า</span><span>${baht(prof)}</span></div></div>`;
+ h+=`<div class="sec">รายรับแยกตามประเภทงาน</div><div class="card">`+by.map(b=>`<div style="margin:6px 0"><div class="row small"><span>${TICON[b.t]} ${b.t} (${b.n})</span><b>${baht(b.v)}</b></div><div class="bar" style="width:${Math.max(2,b.v/mx*100)}%"></div></div>`).join('')+`</div>`;
+ h+=`<div class="sec">งานที่ปิดแล้ว</div><div class="card">`+(js.map(j=>{const r=sum(j.items,'p'),p=r-sum(j.items,'c')-TRAVEL;return `<div class="urow row"><div><b>${esc(jobName(j))}</b><div class="small mute">${j.date===day(0)?'วันนี้':thd(j.date)} · ${TICON[j.type]} ${j.type}</div></div><div style="text-align:right">${baht(r)}<div class="small" style="color:#166534">กำไร ${baht(p)}</div></div></div>`}).join('')||'<div class="mute">ยังไม่มีงานที่ปิดในช่วงนี้</div>')+`</div>`;
+ h+=cta();
+ return h;
+}
+
+load();
+const qt=new URLSearchParams(location.search).get('tab');if(qt&&TITLES[qt])S.tab=qt;
+render();
+</script>
+</body>
+</html>
